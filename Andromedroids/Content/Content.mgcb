@@ -61,3 +61,27 @@
 /processorParam:TextureFormat=Color
 /build:Bundle/image.jpg
 
+#begin Fonts/Bold.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Bold.spritefont
+
+#begin Fonts/Thin.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Thin.spritefont
+
+#begin Fonts/HelloWorld.ttf
+/importer:
+/processor:
+/build:Fonts/HelloWorld.ttf
+
+#begin Fonts/Runescape.ttf
+/importer:
+/processor:
+/build:Fonts/Runescape.ttf
+

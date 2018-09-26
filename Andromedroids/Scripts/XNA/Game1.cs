@@ -6,14 +6,16 @@ namespace Andromedroids
 {
     public class XNAController : Game
     {
-        public GraphicsDeviceManager Graphics { get; private set; }
-        public SpriteBatch SpriteBatch { get; private set; }
-        public MainController MainController { get; private set; }
+        public static XNAController Singleton { get; private set; }
+        public static GraphicsDeviceManager Graphics { get; private set; }
+        public static SpriteBatch SpriteBatch { get; private set; }
+        public static MainController MainController { get; private set; }
 
         string test = ContentController.Get<string>("Hello");
 
         public XNAController()
         {
+            Singleton = this;
             Graphics = new GraphicsDeviceManager(this);
             MainController = new MainController();
 

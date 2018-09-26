@@ -1,0 +1,4 @@
+﻿Team color attributes on ship:
+
+ff 00 ff - darkest possible
+ff fe ff - brightest possible
