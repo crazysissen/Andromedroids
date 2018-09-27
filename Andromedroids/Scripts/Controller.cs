@@ -28,7 +28,7 @@ namespace Andromedroids
 
         public void Draw(XNAController systemController, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTime)
         {
-            spriteBatch.Begin(SpriteSortMode., BlendState.AlphaBlend, SamplerState.PointClamp)
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
         }
     }
 }

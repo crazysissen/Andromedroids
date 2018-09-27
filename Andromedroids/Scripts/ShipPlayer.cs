@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
+
     abstract class ShipPlayer
     {
         string playerName = "NewPlayer";
@@ -43,6 +44,6 @@ namespace Andromedroids
             }
         }
 
-
+        public abstract StartupConfig GetConfig();
     }
 }

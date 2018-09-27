@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Andromedroids.ContentController">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="Andromedroids.ContentController.ContentBundle" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\ContentController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Struct Name="Andromedroids.ContentController.ImportObject" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\ContentController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Struct Name="Andromedroids.ContentController.ImportCollection" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\ContentController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAQFAAAAAAAAAAAAAAQCAAQgAAEEAAAA=</HashCode>
+      <FileName>Scripts\ContentController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.MainController">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scripts\Controller.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.RendererController">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACgAAAAAAAAAAAAAQAAAAAAAAAAAAAABAAAAAAgAA=</HashCode>
+      <FileName>Scripts\Renderer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.Renderer" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Andromedroids.Renderer.Sprite" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\Renderer.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Andromedroids.Renderer.SpriteRectangle" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\Renderer.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Andromedroids.Renderer.Text" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\Renderer.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Andromedroids.Renderer.Custom" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\Renderer.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Andromedroids.Renderer.Animator" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\Renderer.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Delegate Name="Andromedroids.Renderer.DrawCommand" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Scripts\Renderer.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scripts\Renderer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.Camera" Collapsed="true">
+    <Position X="7.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAgAAIAAEAAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scripts\Renderer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.ShipPlayer" Collapsed="true">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAIAAkAAAAAAAAAAAAAAAgAAAAAAAA=</HashCode>
+      <FileName>Scripts\ShipPlayer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.Weapon" Collapsed="true">
+    <Position X="5.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scripts\Weapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.XNAController" Collapsed="true">
+    <Position X="9.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAEAAAAAAAAwAAAAAAAAAACCAAAAEIQAAAAAAAAAQ=</HashCode>
+      <FileName>Scripts\XNA\Game1.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.Program" Collapsed="true">
+    <Position X="9.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Scripts\XNA\Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Andromedroids.Scripts.Players.TestPlayer" Collapsed="true">
+    <Position X="0.5" Y="7.75" Width="1.5" />
+    <InheritanceLine Type="Andromedroids.ShipPlayer" FixedToPoint="true">
+      <Path>
+        <Point X="1.25" Y="6.062" />
+        <Point X="1.25" Y="7.75" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scripts\Players\TestPlayer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Andromedroids.StartupConfig" Collapsed="true">
+    <Position X="5.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAQAQAAAAAAAAAAAgAAAABA=</HashCode>
+      <FileName>Scripts\StartupConfig.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Andromedroids.ShipClassPrerequesite" Collapsed="true">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAACAAAAAAAAAAAAAAEAAABEAAAAAAAAAAEAABAAAA=</HashCode>
+      <FileName>Scripts\StartupConfig.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="Andromedroids.ShipClass" Collapsed="true">
+    <Position X="5.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scripts\StartupConfig.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

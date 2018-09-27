@@ -53,6 +53,8 @@
     <Compile Include="Scripts\Players\TestPlayer.cs" />
     <Compile Include="Scripts\Renderer.cs" />
     <Compile Include="Scripts\ShipPlayer.cs" />
+    <Compile Include="Scripts\StartupConfig.cs" />
+    <Compile Include="Scripts\Weapon.cs" />
     <Compile Include="Scripts\XNA\Game1.cs" />
     <Compile Include="Scripts\XNA\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,6 +70,7 @@
   <ItemGroup>
     <Content Include="GraphicsNotes.txt" />
     <Content Include="Icon.ico" />
+    <None Include="ClassDiagram.cd" />
     <None Include="Resources\Icon.ico" />
   </ItemGroup>
   <ItemGroup>

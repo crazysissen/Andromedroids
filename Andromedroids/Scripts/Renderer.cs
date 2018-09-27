@@ -40,7 +40,7 @@ namespace Andromedroids
 
         public void Destroy()
         {
-
+            RendererController.RemoveRenderer(this);
         }
 
         public class Sprite : Renderer
@@ -58,7 +58,7 @@ namespace Andromedroids
             /// </summary>
             public Texture2D Texture { get; private set; }
             /// <summary>
-            /// The dimensions and location of the object in world space
+            /// The dimensions and location of the object in screen space (pixel coordinates)
             /// </summary>
             public Rectangle Rectangle { get; private set; }
             /// <summary>
