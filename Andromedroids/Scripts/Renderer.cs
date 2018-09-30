@@ -31,7 +31,7 @@ namespace Andromedroids
 
     abstract class Renderer
     {
-        public abstract void Draw(SpriteBatch spriteBatch, float deltaTime);
+        public abstract void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime);
 
         public Renderer()
         {
@@ -45,9 +45,24 @@ namespace Andromedroids
 
         public class Sprite : Renderer
         {
-            public override void Draw(SpriteBatch spriteBatch, float deltaTime)
+            /// <summary>
+            /// The texture of the object
+            /// </summary>
+            public Texture2D Texture { get; private set; }
+
+            /// <summary>
+            /// The width/height of the object
+            /// </summary>
+            public Vector2 Size { get; private set; }
+
+            /// <summary>
+            /// The color multiplier of the object
+            /// </summary>
+            public Color Color { get; private set; }
+
+            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
-                
+                spriteBatch.Draw()
             }
         }
 
@@ -57,10 +72,12 @@ namespace Andromedroids
             /// The texture of the object
             /// </summary>
             public Texture2D Texture { get; private set; }
+
             /// <summary>
             /// The dimensions and location of the object in screen space (pixel coordinates)
             /// </summary>
             public Rectangle Rectangle { get; private set; }
+
             /// <summary>
             /// The color multiplier of the object
             /// </summary>
@@ -78,7 +95,7 @@ namespace Andromedroids
                 Color = color;
             }
 
-            public override void Draw(SpriteBatch spriteBatch, float deltaTime)
+            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
                 spriteBatch.Draw(Texture, Rectangle, Color);
             }
@@ -86,7 +103,7 @@ namespace Andromedroids
 
         public class Text : Renderer
         {
-            public override void Draw(SpriteBatch spriteBatch, float deltaTime)
+            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
                 
             }
@@ -101,7 +118,7 @@ namespace Andromedroids
                 Command = drawCommand;
             }
 
-            public override void Draw(SpriteBatch spriteBatch, float deltaTime)
+            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
                 Command.Invoke(spriteBatch, deltaTime);
             }
@@ -111,13 +128,13 @@ namespace Andromedroids
 
         public class Animator : Renderer
         {
-            public override void Draw(SpriteBatch spriteBatch, float deltaTime)
+            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
 
             }
         }
 
-        public delegate void DrawCommand(SpriteBatch spriteBatch, float deltaTime);
+        public delegate void DrawCommand(SpriteBatch spriteBatch, Camera camera, float deltaTime);
     }
 
     public class Camera
@@ -128,9 +145,9 @@ namespace Andromedroids
             => new Vector2(WIDTHDIVISIONS / Scale, (((float)XNAController.Graphics.PreferredBackBufferHeight / XNAController.Graphics.PreferredBackBufferWidth) * WIDTHDIVISIONS) / Scale);
 
         public float WorldUnitDiameter
-            => (XNAController.Graphics.PreferredBackBufferWidth * Scale) / WIDTHDIVISIONS;
+            => (XNAController.Graphics.PreferredBackBufferWidth) / (WIDTHDIVISIONS * Scale);
 
-        public Vector2 Position { get; private set; }
-        public float Scale { get; private set; }
+        public Vector2 Position { get; set; }
+        public float Scale { get; set; }
     }
 }
