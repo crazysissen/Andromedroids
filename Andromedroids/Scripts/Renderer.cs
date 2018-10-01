@@ -18,14 +18,14 @@ namespace Andromedroids
         {
             foreach (Renderer renderer in renderers)
             {
-                renderer.Draw(spriteBatch, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                renderer.Draw(spriteBatch, Camera, (float)gameTime.ElapsedGameTime.TotalSeconds);
             }
         }
 
-        public static void AddRenderer(Renderer renderer) 
+        public static void AddRenderer(Renderer renderer)
             => renderers.Add(renderer);
 
-        public static void RemoveRenderer(Renderer renderer) 
+        public static void RemoveRenderer(Renderer renderer)
             => renderers.Remove(renderer);
     }
 
@@ -48,25 +48,73 @@ namespace Andromedroids
             /// <summary>
             /// The texture of the object
             /// </summary>
-            public Texture2D Texture { get; private set; }
+            public virtual Texture2D Texture { get; set; }
+
+            /// <summary>
+            /// The x & y coordinates of the object in world space
+            /// </summary>
+            public virtual Vector2 Position { get; set; }
 
             /// <summary>
             /// The width/height of the object
             /// </summary>
-            public Vector2 Size { get; private set; }
+            public virtual Vector2 Size { get; set; }
+
+            /// <summary>
+            /// The rotation angle of the object measured in degrees (0-360)
+            /// </summary>
+            public virtual float Rotation { get; set; }
+
+            /// <summary>
+            /// The point on the object around which it rotates
+            /// </summary>
+            public virtual Vector2 RotationOrigin { get; set; }
 
             /// <summary>
             /// The color multiplier of the object
             /// </summary>
-            public Color Color { get; private set; }
+            public virtual Color Color { get; set; }
+
+            /// <summary>
+            /// Wether or not the sprite is flipped somehow, stack using binary OR operator (|)
+            /// </summary>
+            public virtual SpriteEffects Effects { get; set; }
+
+            public Sprite(Texture2D texture, Vector2 position, Vector2 size, Color color, float rotation, SpriteEffects effects)
+            {
+                Texture = texture;
+                Position = position;
+                Size = size;
+                Rotation = rotation;
+                Color = color;
+                Effects = effects;
+            }
 
             public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
-                spriteBatch.Draw()
+                spriteBatch.Draw(Texture, camera.WorldToScreenPosition(Position), null, Color, Rotation, RotationOrigin, Size, Effects, 0);
             }
         }
 
-        public class SpriteRectangle : Renderer
+        //public class SpriteAuto : Sprite
+        //{
+        //    Func<Texture2D> getTexture;
+        //    Func<Vector2> getPosition, getSize;
+        //    Func<Color> getColor;
+
+        //    public override Texture2D Texture => getTexture.Invoke();
+        //    public override Vector2 Position => getPosition.Invoke();
+        //    public override Vector2 Size => getSize.Invoke();
+        //    public override Color Color => getColor.Invoke();
+        //    public override SpriteEffects Effects => SpriteEffects.None;
+
+        //    public SpriteAuto()
+        //    {
+
+        //    }
+        //}
+
+        public class SpriteScreen : Renderer
         {
             /// <summary>
             /// The texture of the object
@@ -83,14 +131,14 @@ namespace Andromedroids
             /// </summary>
             public Color Color { get; private set; }
 
-            public SpriteRectangle(Texture2D texture, Rectangle rectangle)
+            public SpriteScreen(Texture2D texture, Rectangle rectangle)
             {
                 Texture = texture;
                 Rectangle = rectangle;
                 Color = Color.White;
             }
 
-            public SpriteRectangle(Texture2D texture, Rectangle rectangle, Color color) : this(texture, rectangle)
+            public SpriteScreen(Texture2D texture, Rectangle rectangle, Color color) : this(texture, rectangle)
             {
                 Color = color;
             }
@@ -105,7 +153,7 @@ namespace Andromedroids
         {
             public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
-                
+
             }
         }
 
@@ -120,7 +168,7 @@ namespace Andromedroids
 
             public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
-                Command.Invoke(spriteBatch, deltaTime);
+                Command.Invoke(spriteBatch, camera, deltaTime);
             }
 
             public void SetCommand(DrawCommand drawCommand) => Command = drawCommand;
@@ -141,7 +189,7 @@ namespace Andromedroids
     {
         const float WIDTHDIVISIONS = 16;
 
-        public Vector2 ScreenWorldDimensions 
+        public Vector2 ScreenWorldDimensions
             => new Vector2(WIDTHDIVISIONS / Scale, (((float)XNAController.Graphics.PreferredBackBufferHeight / XNAController.Graphics.PreferredBackBufferWidth) * WIDTHDIVISIONS) / Scale);
 
         public float WorldUnitDiameter
@@ -149,5 +197,15 @@ namespace Andromedroids
 
         public Vector2 Position { get; set; }
         public float Scale { get; set; }
+
+        public Vector2 WorldToScreenPosition(Vector2 worldPosition)
+        {
+            return (worldPosition - Position) * Scale;
+        }
+
+        public Vector2 WorldToScreenSize(Vector2 size)
+        {
+            return size * Scale;
+        }
     }
 }
