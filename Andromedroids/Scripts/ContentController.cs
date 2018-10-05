@@ -17,6 +17,8 @@ namespace Andromedroids
     /// </summary>
     public static class ContentController
     {
+        static readonly string[] excludeFiles = new string[] { "Runescape", "HelloWorld" };
+
         static Dictionary<string, object> contentDictionary;
 
         static Dictionary<string, object> contentCollections;
@@ -107,6 +109,9 @@ namespace Andromedroids
             foreach (FileInfo file in files)
             {
                 string currentName = Path.GetFileNameWithoutExtension(file.FullName);
+
+                if (excludeFiles.Contains(currentName))
+                    continue;
 
                 allFiles.Add(new ImportObject(currentName, appendableAdditionalPath + currentName));
                 currentCollectionNames.Add(currentName);

@@ -11,8 +11,6 @@ namespace Andromedroids
         public static SpriteBatch SpriteBatch { get; private set; }
         public static MainController MainController { get; private set; }
 
-        string test = ContentController.Get<string>("Hello");
-
         public XNAController()
         {
             Singleton = this;
@@ -34,6 +32,8 @@ namespace Andromedroids
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
             ContentController.Initialize(Content, true);
+
+            MainController.LateInitialize(this);
         }
 
         protected override void UnloadContent()

@@ -48,12 +48,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Scripts\CheatDetection.cs" />
     <Compile Include="Scripts\ContentController.cs" />
     <Compile Include="Scripts\Controller.cs" />
     <Compile Include="Scripts\Players\TestPlayer.cs" />
     <Compile Include="Scripts\Renderer.cs" />
     <Compile Include="Scripts\ShipPlayer.cs" />
     <Compile Include="Scripts\StartupConfig.cs" />
+    <Compile Include="Scripts\StateManage.cs" />
     <Compile Include="Scripts\Weapon.cs" />
     <Compile Include="Scripts\XNA\Game1.cs" />
     <Compile Include="Scripts\XNA\Program.cs" />

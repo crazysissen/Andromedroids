@@ -14,12 +14,25 @@ namespace Andromedroids
 
         static List<Renderer> renderers = new List<Renderer>();
 
-        public static void Render(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime)
+        public static void Initialize(Vector2 cameraPosition, float cameraScale)
         {
+            Camera = new Camera()
+            {
+                Position = cameraPosition,
+                Scale = cameraScale
+            };
+        }
+
+        public static void Draw(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+
             foreach (Renderer renderer in renderers)
             {
                 renderer.Draw(spriteBatch, Camera, (float)gameTime.ElapsedGameTime.TotalSeconds);
             }
+
+            spriteBatch.End();
         }
 
         public static void AddRenderer(Renderer renderer)
@@ -68,7 +81,7 @@ namespace Andromedroids
             /// <summary>
             /// The point on the object around which it rotates
             /// </summary>
-            public virtual Vector2 RotationOrigin { get; set; }
+            public virtual Vector2 Origin { get; set; }
 
             /// <summary>
             /// The color multiplier of the object
@@ -80,19 +93,24 @@ namespace Andromedroids
             /// </summary>
             public virtual SpriteEffects Effects { get; set; }
 
-            public Sprite(Texture2D texture, Vector2 position, Vector2 size, Color color, float rotation, SpriteEffects effects)
+            public Sprite(Texture2D texture, Vector2 position, Vector2 size, Color color, float rotation, Vector2 origin, SpriteEffects effects)
             {
                 Texture = texture;
                 Position = position;
                 Size = size;
                 Rotation = rotation;
                 Color = color;
+                Origin = origin;
                 Effects = effects;
             }
 
+            public Sprite(Texture2D texture, Vector2 position, Vector2 size, float rotation)
+                : this(texture, position, size, Color.White, rotation, new Vector2(texture.Width, texture.Height) * 0.5f, SpriteEffects.None) { }
+            
+
             public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
-                spriteBatch.Draw(Texture, camera.WorldToScreenPosition(Position), null, Color, Rotation, RotationOrigin, Size, Effects, 0);
+                spriteBatch.Draw(Texture, camera.WorldToScreenPosition(Position), null, Color, Rotation, Origin, camera.WorldToScreenSize(Size), Effects, 0);
             }
         }
 
@@ -187,7 +205,9 @@ namespace Andromedroids
 
     public class Camera
     {
-        const float WIDTHDIVISIONS = 16;
+        const float 
+            WIDTHDIVISIONS = 16.0f,
+            DISTANCEMODIFIER = 20.0f;
 
         public Vector2 ScreenWorldDimensions
             => new Vector2(WIDTHDIVISIONS / Scale, (((float)XNAController.Graphics.PreferredBackBufferHeight / XNAController.Graphics.PreferredBackBufferWidth) * WIDTHDIVISIONS) / Scale);
@@ -200,7 +220,7 @@ namespace Andromedroids
 
         public Vector2 WorldToScreenPosition(Vector2 worldPosition)
         {
-            return (worldPosition - Position) * Scale;
+            return (worldPosition - Position) * Scale * DISTANCEMODIFIER + new Vector2(XNAController.Graphics.PreferredBackBufferWidth, XNAController.Graphics.PreferredBackBufferHeight) * 0.5f;
         }
 
         public Vector2 WorldToScreenSize(Vector2 size)

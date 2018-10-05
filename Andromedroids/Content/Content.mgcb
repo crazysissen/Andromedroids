@@ -28,14 +28,10 @@
 /build:Fonts/Thin.spritefont
 
 #begin Fonts/HelloWorld.ttf
-/importer:
-/processor:
-/build:Fonts/HelloWorld.ttf
+/copy:Fonts/HelloWorld.ttf
 
 #begin Fonts/Runescape.ttf
-/importer:
-/processor:
-/build:Fonts/Runescape.ttf
+/copy:Fonts/Runescape.ttf
 
 #begin Ships/Freighter.png
 /importer:TextureImporter

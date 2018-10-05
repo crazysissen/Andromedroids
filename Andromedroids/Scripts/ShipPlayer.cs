@@ -9,39 +9,28 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
-
     abstract class ShipPlayer
     {
-        string playerName = "NewPlayer";
-        public string PlayerName
+        public string PlayerName { get; private set; } = "Player Name";
+        public Color PlayerColor { get; private set; } = Color.Gray;
+
+        private int hashKey;
+
+        public ShipPlayer(int hashKey)
         {
-            get
-            {
-                return playerName;
-            }
-            set
-            {
-                if (playerName == "NewPlayer")
-                {
-                    playerName = value;
-                }
-            }
+            this.hashKey = hashKey;
         }
 
-        Color playerColor = Color.Gray;
-        public Color PlayerColor
+        public void Setup(int hash)
         {
-            get
+            if (hash == hashKey)
             {
-                return playerColor;
+
+
+                return;
             }
-            set
-            {
-                if (PlayerColor == Color.Gray)
-                {
-                    playerColor = value;
-                }
-            }
+
+            MainController.ReportCheat(PlayerName + " tried to re-configure the base class ShipPlayer");
         }
 
         public abstract StartupConfig GetConfig();
