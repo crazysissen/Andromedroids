@@ -6,6 +6,8 @@ namespace Andromedroids
 {
     public class XNAController : Game
     {
+        public static float TimeScale { get; set; }
+
         public static XNAController Singleton { get; private set; }
         public static GraphicsDeviceManager Graphics { get; private set; }
         public static SpriteBatch SpriteBatch { get; private set; }
@@ -45,7 +47,7 @@ namespace Andromedroids
         {
             base.Update(gameTime);
 
-            MainController.Update(this, gameTime, (float)gameTime.ElapsedGameTime.TotalSeconds);
+            MainController.Update(this, gameTime, (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -54,7 +56,7 @@ namespace Andromedroids
 
             base.Draw(gameTime);
 
-            MainController.Draw(this, Graphics, SpriteBatch, gameTime, deltaTime: (float)gameTime.ElapsedGameTime.TotalSeconds);
+            MainController.Draw(this, Graphics, SpriteBatch, gameTime, deltaTimeScaled: (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale);
         }
     }
 }

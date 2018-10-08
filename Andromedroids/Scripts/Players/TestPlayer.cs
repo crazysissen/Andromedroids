@@ -7,31 +7,37 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Andromedroids.Scripts.Players
+// Don't change
+namespace Andromedroids.Players 
 {
     class TestPlayer : ShipPlayer
     {
+        public TestPlayer()
+        {
+            base.
+        }
+
         /// <summary>
         /// Requested initially when the game starts. This is where you customize your ship.
         /// </summary>
         public override StartupConfig GetConfig()
         {
             return new StartupConfig
-            (
-                name:           "Test Player",
-                description:    "This is the test player.",
-                color:          Color.Blue,
-                shipClass:      ShipClass.Freighter,
-                types:          new Weapon.Type[] 
+            {
+                Name        = "Test Player",
+                Description = "Fitting description.",
+                Color       = Color.Blue,
+                Class       = ShipClass.Freighter,
+                Weapons     = new Weapon.StartType[]
                 {
-                    Weapon.Type.CaliberCannon,
-                    Weapon.Type.CaliberCannon,
-                    Weapon.Type.GatlingGun,
-                    Weapon.Type.GatlingGun,
-                    Weapon.Type.GatlingGun,
-                    Weapon.Type.GatlingGun
+                    Weapon.StartType.CaliberCannon,
+                    Weapon.StartType.CaliberCannon,
+                    Weapon.StartType.GatlingGun,
+                    Weapon.StartType.GatlingGun,
+                    Weapon.StartType.GatlingGun,
+                    Weapon.StartType.GatlingGun
                 }
-            );
+            };
         }
     }
 }

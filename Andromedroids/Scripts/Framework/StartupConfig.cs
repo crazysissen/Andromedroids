@@ -13,12 +13,12 @@ namespace Andromedroids
 
     struct StartupConfig
     {
-        public string Name { get; private set; }
-        public string Description { get; private set; }
-        public Color Color { get; private set; }
-        public ShipClass Class { get; private set; }
-        public Weapon.Type[] Weapons { get; private set; }
-        public ShipClassPrerequesite Prerequesite { get; private set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Color Color { get; set; }
+        public ShipClass Class { get; set; }
+        public Weapon.StartType[] Weapons { get; set; }
+        public ShipClassPrerequesite Prerequesite { get; set; }
 
         public StartupConfig(string name, string description, Color color, ShipClass shipClass, Weapon.Type[] types)
         {
@@ -28,19 +28,7 @@ namespace Andromedroids
             Description = description;
             Color = color;
             Class = shipClass;
-            Weapons = new Weapon.Type[Prerequesite.WeaponCount];
-
-            Weapon.Type[] allowedTypes = Weapon.StartingTypes;
-
-            for (int i = 0; i < Weapons.Length; ++i)
-            {
-                if (i >= types.Length)
-                {
-                    Weapons[i] = Weapon.Type.GatlingGun;
-                }
-
-                Weapons[i] = types[i];
-            }
+            Weapons = new Weapon.StartType[Prerequesite.WeaponCount];
         }
     }
 

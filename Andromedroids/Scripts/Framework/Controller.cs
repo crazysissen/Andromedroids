@@ -11,19 +11,21 @@ namespace Andromedroids
 {
     public class MainController
     {
+        public static string CurrentPlayer { get; private set; }
+
         static CheatDetection cheat;
         static StateManager stateManager;
 
         Renderer.Sprite ship;
         Random r;
-        int hashKey;
+        HashKey key;
 
         public MainController()
         {
             cheat = new CheatDetection();
 
             r = new Random();
-            hashKey = r.Next(0x1111, 0xFFFF);
+            key = new HashKey();
             stateManager = new StateManager(GameState.QuickMenu, 0);
         }
 
@@ -35,22 +37,21 @@ namespace Andromedroids
         public void LateInitialize(XNAController systemController)
         {
             ship = new Renderer.Sprite(ContentController.Get<Texture2D>("Freighter"), new Vector2(5, 0), new Vector2(1, 1), 0);
+
+
         }
 
-        public void Update(XNAController systemController, GameTime gameTime, float deltaTime)
+        public void Update(XNAController systemController, GameTime gameTime, float deltaTimeScaled)
         {
-            ship.Position += Vector2.One * deltaTime;
-            ship.Rotation += deltaTime;
+            ship.Position += Vector2.One * deltaTimeScaled;
+            ship.Rotation += deltaTimeScaled;
+
+            cheat.Execute();
         }
 
-        public void Draw(XNAController systemController, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTime)
+        public void Draw(XNAController systemController, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTimeScaled)
         {
             RendererController.Draw(graphics, spriteBatch, gameTime);
-        }
-
-        public static void ReportCheat(string message)
-        {
-            stateManager.SetGameState(GameState.Cheat);
         }
     }
 }
