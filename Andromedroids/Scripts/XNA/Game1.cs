@@ -8,16 +8,17 @@ namespace Andromedroids
     {
         public static float TimeScale { get; set; }
 
-        public static XNAController Singleton { get; private set; }
-        public static GraphicsDeviceManager Graphics { get; private set; }
-        public static SpriteBatch SpriteBatch { get; private set; }
-        public static MainController MainController { get; private set; }
+        public GraphicsDeviceManager Graphics { get; private set; }
+        public SpriteBatch SpriteBatch { get; private set; }
+        public MainController MainController { get; private set; }
+
+        private static XNAController singleton;
 
         public XNAController()
         {
-            Singleton = this;
+            singleton = this;
             Graphics = new GraphicsDeviceManager(this);
-            MainController = new MainController();
+            MainController = new MainController(this);
 
             Content.RootDirectory = "Content";
         }
@@ -25,6 +26,12 @@ namespace Andromedroids
         protected override void Initialize()
         {
             base.Initialize();
+
+            Graphics.PreferredBackBufferWidth = 1280;
+            Graphics.PreferredBackBufferHeight = 720;
+            Graphics.ApplyChanges();
+
+            IsMouseVisible = true;
 
             MainController.Initialize(systemController: this);
         }
@@ -52,7 +59,7 @@ namespace Andromedroids
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(new Color(20, 20, 60));
+            GraphicsDevice.Clear(new Color(30, 0, 60));
 
             base.Draw(gameTime);
 
