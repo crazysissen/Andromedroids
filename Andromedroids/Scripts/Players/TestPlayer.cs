@@ -14,7 +14,6 @@ namespace Andromedroids.Players
     {
         public TestPlayer()
         {
-            base.
         }
 
         /// <summary>

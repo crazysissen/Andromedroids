@@ -51,7 +51,10 @@
     <Compile Include="Scripts\Framework\CheatDetection.cs" />
     <Compile Include="Scripts\Framework\ContentController.cs" />
     <Compile Include="Scripts\Framework\Controller.cs" />
+    <Compile Include="Scripts\Framework\GUI.cs" />
     <Compile Include="Scripts\Framework\HashKey.cs" />
+    <Compile Include="Scripts\Framework\In.cs" />
+    <Compile Include="Scripts\Framework\MathA.cs" />
     <Compile Include="Scripts\Players\TestPlayer.cs" />
     <Compile Include="Scripts\Framework\Renderer.cs" />
     <Compile Include="Scripts\Framework\ShipPlayer.cs" />

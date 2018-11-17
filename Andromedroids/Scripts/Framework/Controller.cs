@@ -32,11 +32,13 @@ namespace Andromedroids
         public void Initialize(XNAController systemController)
         {
             RendererController.Initialize(new Vector2(0, 0), 1f);
+            Renderer.SetKey(key);
+
+            ship = new Renderer.Sprite(new Layer(MainLayer.Main, 0), ContentController.Get<Texture2D>("Freighter"), new Vector2(5, 0), new Vector2(1, 1), Color.White, 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
         }
 
         public void LateInitialize(XNAController systemController)
         {
-            ship = new Renderer.Sprite(ContentController.Get<Texture2D>("Freighter"), new Vector2(5, 0), new Vector2(1, 1), 0);
 
 
         }
