@@ -9,24 +9,26 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
-    enum ShipClass { Freighter, Fighter }
+    enum ShipClass { Hammerhead, Fighter }
 
     struct StartupConfig
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public Color Color { get; set; }
+        public Color HullColor { get; set; }
+        public Color DecalColor { get; set; }
         public ShipClass Class { get; set; }
-        public Weapon.StartType[] Weapons { get; set; }
         public ShipClassPrerequesite Prerequesite { get; set; }
+        public Weapon.StartType[] Weapons { get; set; }
 
-        public StartupConfig(string name, string description, Color color, ShipClass shipClass, Weapon.Type[] types)
+        public StartupConfig(ShipClass shipClass)
         {
             Prerequesite = new ShipClassPrerequesite(shipClass);
 
-            Name = name;
-            Description = description;
-            Color = color;
+            Name = "";
+            Description = "";
+            HullColor = Color.White;
+            DecalColor = Color.White;
             Class = shipClass;
             Weapons = new Weapon.StartType[Prerequesite.WeaponCount];
         }
@@ -34,6 +36,7 @@ namespace Andromedroids
 
     struct ShipClassPrerequesite
     {
+        public Texture2D Sprite { get; private set; }
         public int WeaponCount { get; private set; }
         public int Health { get; private set; }
         public int Energy { get; private set; }
@@ -46,8 +49,9 @@ namespace Andromedroids
         {
             switch (shipClass)
             {
-                case ShipClass.Freighter:
+                case ShipClass.Hammerhead:
 
+                    Sprite = ContentController.Get<Texture2D>("Hammerhead");
                     WeaponCount = 6;
                     Health = 500;
                     Energy = 12;
@@ -59,6 +63,7 @@ namespace Andromedroids
 
                 case ShipClass.Fighter:
 
+                    Sprite = ContentController.Get<Texture2D>("Hammerhead");
                     WeaponCount = 5;
                     Health = 350;
                     Energy = 14;

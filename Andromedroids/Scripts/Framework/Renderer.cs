@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,7 +19,7 @@ namespace Andromedroids
         static List<Renderer> renderers = new List<Renderer>();
         static List<RMO> renderMasks = new List<RMO>();
 
-        public static void Initialize(Vector2 cameraPosition, float cameraScale)
+        public static void Initialize(GraphicsDeviceManager graphics, Vector2 cameraPosition, float cameraScale)
         {
             GUI = new GUI();
 
@@ -31,6 +33,11 @@ namespace Andromedroids
         public static void Draw(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime)
         {
             XNAController.Graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.DarkBlue, 0, 0);
+            System.Diagnostics.Debug.WriteLine(camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
+
+            //camera.Scale -= (0.2f * (float)gameTime.ElapsedGameTime.TotalSeconds);
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
             MouseState mouseState = In.MouseState;
             KeyboardState keyboardState = In.KeyboardState;
@@ -108,6 +115,15 @@ namespace Andromedroids
                 renderers.Add(renderer);
             }
         }
+        public static void RemoveRenderer(Renderer renderer)
+            => renderers.Remove(renderer);
+
+        public static Camera GetCamera(HashKey key)
+        {
+            if (key.Validate("GetCamera"))
+            {
+                return camera;
+            }
 
         public static void RemoveRenderer(HashKey key, Renderer renderer)
         {
@@ -194,6 +210,49 @@ namespace Andromedroids
                 Texture = texture;
                 Position = position;
                 Size = size;
+                Rotation = rotation;
+                Origin = rotationOrigin;
+                Color = color;
+                Effects = effects;
+            }
+
+            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
+            {
+                spriteBatch.Draw(Texture, camera.WorldToScreenPosition(Position), null, Color, Rotation, Origin, camera.WorldToScreenSize(Size), Effects, Layer.LayerDepth);
+            }
+        }
+
+        public class SpriteScreen : Renderer
+        {
+            /// <summary>The texture of the object</summary>
+            public virtual Texture2D Texture { get; set; }
+
+            /// <summary>The x & y coordinates of the object in world spacesummary>
+            public virtual Rectangle Transform { get; set; }
+
+            /// <summary>The rotation angle of the object measured in degrees (0-360)</summary>
+            public virtual float Rotation { get; set; }
+
+            /// <summary>A vector between (0,0) and (1,1) to represent the pivot around which the object rotates 
+            /// and what point will line up to the Vector2 position</summary>
+            public virtual Vector2 Origin { get; set; }
+
+            /// <summary>The color multiplier of the object</summary>
+            public virtual Color Color { get; set; }
+
+            /// <summary> Wether or not the sprite is flipped somehow, stack using binary OR operator (|)</summary>
+            public virtual SpriteEffects Effects { get; set; }
+
+            public override Layer Layer { get; set; }
+
+            public SpriteScreen(Texture2D texture, Rectangle transform) : this(texture, transform, Color.White, 0, Vector2.Zero, SpriteEffects.None) { }
+
+            public SpriteScreen(Texture2D texture, Rectangle transform, Color color) : this(texture, transform, color, 0, Vector2.Zero, SpriteEffects.None) { }
+
+            public SpriteScreen(Texture2D texture, Rectangle transform, Color color, float rotation, Vector2 rotationOrigin, SpriteEffects effects)
+            {
+                Texture = texture;
+                Transform = transform;
                 Rotation = rotation;
                 Origin = rotationOrigin;
                 Color = color;
@@ -496,27 +555,74 @@ namespace Andromedroids
 
     public class Camera
     {
-        const float 
-            WIDTHDIVISIONS = 16.0f,
-            DISTANCEMODIFIER = 20.0f;
+        // A square based on the average distances to the screen edges, divided into pieces
+        const float
+            UNIVERSALMODIFIER = 0.1f;
 
-        public Vector2 ScreenWorldDimensions
-            => new Vector2(WIDTHDIVISIONS / Scale, (((float)XNAController.Graphics.PreferredBackBufferHeight / XNAController.Graphics.PreferredBackBufferWidth) * WIDTHDIVISIONS) / Scale);
-
-        public float WorldUnitDiameter
-            => (XNAController.Graphics.PreferredBackBufferWidth) / (WIDTHDIVISIONS * Scale);
+        public const int
+            WORLDUNITPIXELS = 1500; 
 
         public Vector2 Position { get; set; }
         public float Scale { get; set; }
 
-        public Vector2 WorldToScreenPosition(Vector2 worldPosition)
+        public Vector2 CenterCoordinate { get; private set; }
+
+        public int ScreenWidth { get; set; }
+        public int ScreenHeight { get; set; }
+
+        private float _standardWUScaling, _standardSquareDiameter;
+
+        public float WorldUnitDiameter => _standardWUScaling * _standardSquareDiameter;
+
+        public Camera(GraphicsDeviceManager graphics)
         {
-            return (worldPosition - Position) * Scale * DISTANCEMODIFIER + new Vector2(XNAController.Graphics.PreferredBackBufferWidth, XNAController.Graphics.PreferredBackBufferHeight) * 0.5f;
+            ScreenWidth = graphics.PreferredBackBufferWidth;
+            ScreenHeight = graphics.PreferredBackBufferHeight;
+
+            _standardSquareDiameter = 0.5f * (ScreenWidth + ScreenHeight);
+            
+            _standardWUScaling = _standardSquareDiameter / WORLDUNITPIXELS;
+
+            CenterCoordinate = new Vector2(ScreenWidth * 0.5f, ScreenHeight * 0.5f);
         }
 
+        public Vector2 WorldToScreenPosition(Vector2 worldPosition)
+            => CenterCoordinate + (worldPosition - Position) * _standardSquareDiameter * _standardWUScaling * Scale * UNIVERSALMODIFIER;
+
+        public Vector2 ScreenToWorldPosition(Vector2 screenPosition)
+            => (screenPosition - CenterCoordinate) / (_standardSquareDiameter * _standardWUScaling * Scale * UNIVERSALMODIFIER) + Position;
+
         public Vector2 WorldToScreenSize(Vector2 size)
+            => size * UNIVERSALMODIFIER * Scale;
+
+        public Vector2 ScreenToWorldSize(Vector2 size)
+            => size / (UNIVERSALMODIFIER * Scale);
+    }
+
+    public struct Layer
+    {
+        public enum Main
         {
-            return size * Scale;
+            AbsoluteBottom, Background, Main, Overlay, GUI, AbsoluteTop
+        }
+
+        public const int
+            MAINCOUNT = 6;
+
+        public const float
+            LAYERINTERVAL = float.Epsilon,
+            MAININTERVAL = 1 / MAINCOUNT,
+            HALFINTERVAL = MAININTERVAL * 0.5f;
+
+        public float LayerDepth => 1 - ((int)main * MAININTERVAL + HALFINTERVAL + LAYERINTERVAL * layer);
+
+        public Main main;
+        public int layer;
+
+        public Layer(Main main, int layer)
+        {
+            this.main = main;
+            this.layer = layer;
         }
     }
 

@@ -1,33 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Andromedroids
 {
     public class MainController
     {
-        public static string CurrentPlayer { get; private set; }
+        private static CheatDetection cheat;
 
-        static CheatDetection cheat;
-        static StateManager stateManager;
+        private bool running;
+        private StateManager stateManager;
+        private Renderer.Sprite backgroundSquare;
+        private ShipPlayer[] players;
+        private Random r;
+        private HashKey key;
+        private List<MenuPlayer> menuPlayers;
+        private System.Timers.Timer timer;
 
-        Renderer.Sprite ship;
-        Random r;
-        HashKey key;
-
-        public MainController()
+        public MainController(XNAController systemController)
         {
-            cheat = new CheatDetection();
 
+        }
+
+        public void Initialize(XNAController systemController)
+        {
             r = new Random();
+            cheat = new CheatDetection();
             key = new HashKey();
             stateManager = new StateManager(GameState.QuickMenu, 0);
-        }
+            timer = new System.Timers.Timer(500);
+            timer.Elapsed += UpdateStatistics;
+
+            RendererController.Initialize(systemController.Graphics, new Vector2(0, 0), 0.4f);
+
+            Scoreboard board = Scoreboard.ImportFromFile("Hellothere");
+
+            Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
+            menuPlayers = new List<MenuPlayer>();
+
+            foreach (Type type in allTypes)
+            {
+                Attribute[] attributes = type.GetCustomAttributes() as Attribute[];
+
+                foreach (Attribute attribute in attributes)
+                {
+                    if (attribute is ShipAI)
+                    {
+                        if (type.IsSubclassOf(typeof(ShipPlayer)))
+                        {
+                            string menuName = (attribute as ShipAI).MenuName;
+
+                            menuPlayers.Add(
+                                new MenuPlayer()
+                                {
+                                    menuName = menuName,
+                                    playerType = type
+                                });
+                        }
+                    }
+                }
+            }
 
         public void Initialize(XNAController systemController)
         {
@@ -40,13 +77,20 @@ namespace Andromedroids
         public void LateInitialize(XNAController systemController)
         {
 
-
         }
 
         public void Update(XNAController systemController, GameTime gameTime, float deltaTimeScaled)
         {
-            ship.Position += Vector2.One * deltaTimeScaled;
-            ship.Rotation += deltaTimeScaled;
+            //ship.Position += Vector2.One * deltaTimeScaled;
+            //ship.Rotation += deltaTimeScaled;
+
+            if (running)
+            {
+                foreach (ShipPlayer player in players)
+                {
+                    player.FW_Update(key, gameTime, deltaTimeScaled);
+                }
+            }
 
             cheat.Execute();
         }
@@ -54,6 +98,61 @@ namespace Andromedroids
         public void Draw(XNAController systemController, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTimeScaled)
         {
             RendererController.Draw(graphics, spriteBatch, gameTime);
+        }
+
+        void Setup(MenuPlayer[] menuPlayers)
+        {
+            players = new ShipPlayer[2] 
+            {
+                (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType),
+                (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType)
+            };
+
+            string[] names = new string[]
+            {
+                menuPlayers[0].menuName,
+                menuPlayers[1].menuName
+            };
+
+            StartGame(ref players, names, 10, 2, 9);
+        }
+
+        void UpdateStatistics(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            double[] times = { players[0].FW_GetElapsedTimes(), players[1].FW_GetElapsedTimes() };
+        }
+
+        void StartGame(ref ShipPlayer[] players, string[] playerNames, float wuRadius, float wuMinDistance, float wuMaxDistance)
+        {
+            if (wuRadius < wuMaxDistance)
+            {
+                return;
+            }
+
+            backgroundSquare = new Renderer.Sprite(ContentController.Get<Texture2D>("Square"), Vector2.Zero, RendererController.GetCamera(key).WorldUnitDiameter * Vector2.One * 20, new Color(0, 0, 20, 120), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+            running = true;
+
+            float startRotation = (float)r.NextDouble() * (float)Math.PI * 2;
+            Vector2 startPosition;
+
+            do
+            {
+                startPosition = new Vector2((float)r.NextDouble() * wuMaxDistance * 2 - wuMaxDistance, (float)r.NextDouble() * wuMaxDistance * 2 - wuMaxDistance);
+            }
+            while (Vector2.Distance(Vector2.Zero, startPosition) < wuMinDistance);
+
+            Debug.Write(startPosition);
+
+            for (int i = 0; i < players.Length; i++)
+            {
+                players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+            }
+        }
+
+        struct MenuPlayer
+        {
+            public string menuName;
+            public Type playerType;
         }
     }
 }

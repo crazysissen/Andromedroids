@@ -7,26 +7,29 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-// Don't change
-namespace Andromedroids.Players 
+namespace Andromedroids
 {
+    // Don't remove, this is how the game will find your AI
+    // The string entered will be the menu display name
+    [ShipAI("Test Player")]
     class TestPlayer : ShipPlayer
     {
         public TestPlayer()
         {
+            base.
         }
 
         /// <summary>
         /// Requested initially when the game starts. This is where you customize your ship.
         /// </summary>
-        public override StartupConfig GetConfig()
+        protected override StartupConfig GetConfig()
         {
-            return new StartupConfig
+            return new StartupConfig(ShipClass.Hammerhead)
             {
                 Name        = "Test Player",
-                Description = "Fitting description.",
-                Color       = Color.Blue,
-                Class       = ShipClass.Freighter,
+                Description = "Description.",
+                HullColor   = new Color(200, 200, 200),
+                DecalColor  = new Color(20, 20, 20),
                 Weapons     = new Weapon.StartType[]
                 {
                     Weapon.StartType.CaliberCannon,
@@ -37,6 +40,23 @@ namespace Andromedroids.Players
                     Weapon.StartType.GatlingGun
                 }
             };
+        }
+
+        /// <summary>
+        /// Where you write your initialization logic. Runs only once at the start of the game/round.
+        /// </summary>
+        protected override void Initialize()
+        {
+
+        }
+
+        /// <summary>
+        /// Updated once per frame, this is where you write the real-time logic for your ship. 
+        /// Keep in mind that slow code isn't respected, if you take too long you will skip frames.
+        /// </summary>
+        protected override void Update()
+        {
+
         }
     }
 }

@@ -9,15 +9,15 @@ namespace Andromedroids
 {
     class HashKey
     {
-        public static Int64 PublicKey { get; private set; } = 0;
+        public static uint PublicKey { get; private set; } = 0;
 
         private static Random r = new Random();
 
-        private Int64 key;
+        private uint key;
 
         public HashKey()
         {
-            key = (Int64)(r.NextDouble() * 0xFFFFFFFF);
+            key = (uint)(r.NextDouble() * 0xFFFFFFFF);
 
             if (PublicKey == 0)
                 PublicKey = key;
