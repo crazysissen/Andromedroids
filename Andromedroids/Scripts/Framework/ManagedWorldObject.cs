@@ -9,7 +9,15 @@ namespace Andromedroids
 {
     class ManagedWorldObject
     {
+        private static List<ManagedWorldObject> objects;
+
+        public ManagedWorldObject()
+        {
+
+        }
+
         public float Rotation { get; private set; }
+        public float AngularVelocity { get; private set; }
         public Vector2 Position { get; private set; }
         public Vector2 Velocity { get; private set; }
 
@@ -34,6 +42,26 @@ namespace Andromedroids
             if (key.Validate("ManagedWorldObject.SetRotation"))
             {
                 Rotation = rotation;
+            }
+        }
+
+        public void SetAngularVelocity(HashKey key, float velocity)
+        {
+            if (key.Validate("ManagedWorldObject.SetAngularVelocity"))
+            {
+                AngularVelocity = velocity;
+            }
+        }
+
+        public static void UpdateAll(HashKey key, float scaledDeltaTime)
+        {
+            if (key.Validate("ManagedWorldObject.UpdateAll"))
+            {
+                foreach (ManagedWorldObject obj in objects)
+                {
+                    obj.Rotation += obj.AngularVelocity;
+                    obj.Position += obj.Velocity;
+                }
             }
         }
     }

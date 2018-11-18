@@ -1,7 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 using System;
+using System.Threading;
 using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
@@ -11,16 +13,31 @@ namespace Andromedroids
 {
     public class MainController
     {
+        const int
+            MAPRADIUS = 16,
+            MINSPAWNDISTANCE = 6,
+            MAXSPAWNDISTANCE = 12;
+
         private static CheatDetection cheat;
 
-        private bool running;
         private StateManager stateManager;
-        private Renderer.Sprite backgroundSquare;
-        private ShipPlayer[] players;
+        private Renderer.SpriteScreen menuBackground;
         private Random r;
         private HashKey key;
-        private List<MenuPlayer> menuPlayers;
+        private List<MenuPlayer> menuPlayers, quickstartPlayers;
         private System.Timers.Timer timer;
+        private XNAController controller;
+
+        private GUI.Collection quickStart, mainMenu;
+
+        // Ingame variables
+
+        private int frameCount;
+        private bool aiRunning;
+        private float startCountdown;
+        private PlayerManager[] players;
+        private Renderer.Sprite backgroundSquare;
+
 
         public MainController(XNAController systemController)
         {
@@ -29,19 +46,25 @@ namespace Andromedroids
 
         public void Initialize(XNAController systemController)
         {
+            key = new HashKey();
+
             r = new Random();
             cheat = new CheatDetection();
-            key = new HashKey();
             stateManager = new StateManager(GameState.QuickMenu, 0);
             timer = new System.Timers.Timer(500);
+            controller = systemController;
             timer.Elapsed += UpdateStatistics;
 
-            RendererController.Initialize(systemController.Graphics, new Vector2(0, 0), 0.4f);
+            RendererController.Initialize(key, systemController.Graphics, new Vector2(0, 0), 1f);
+            Renderer.SetKey(key);
+
+            menuPlayers = new List<MenuPlayer>();
+            quickstartPlayers = new List<MenuPlayer>();
 
             Scoreboard board = Scoreboard.ImportFromFile("Hellothere");
 
+            // Importing all players using the ShipAI attribute
             Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
-            menuPlayers = new List<MenuPlayer>();
 
             foreach (Type type in allTypes)
             {
@@ -49,29 +72,57 @@ namespace Andromedroids
 
                 foreach (Attribute attribute in attributes)
                 {
-                    if (attribute is ShipAI)
+                    if (attribute is ShipAI && type.IsSubclassOf(typeof(ShipPlayer)))
                     {
-                        if (type.IsSubclassOf(typeof(ShipPlayer)))
-                        {
-                            string menuName = (attribute as ShipAI).MenuName;
+                        string menuName = (attribute as ShipAI).MenuName;
 
-                            menuPlayers.Add(
-                                new MenuPlayer()
-                                {
-                                    menuName = menuName,
-                                    playerType = type
-                                });
+                        MenuPlayer menuPlayer = new MenuPlayer()
+                        {
+                            menuName = menuName,
+                            playerType = type
+                        };
+
+                        menuPlayers.Add(menuPlayer);
+
+                        if ((attribute as ShipAI).Quickstart)
+                        {
+                            quickstartPlayers.Add(menuPlayer);
                         }
                     }
                 }
             }
 
-        public void Initialize(XNAController systemController)
-        {
-            RendererController.Initialize(new Vector2(0, 0), 1f);
-            Renderer.SetKey(key);
+            #region GUI Initialization
 
-            ship = new Renderer.Sprite(new Layer(MainLayer.Main, 0), ContentController.Get<Texture2D>("Freighter"), new Vector2(5, 0), new Vector2(1, 1), Color.White, 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+            Point res = XNAController.DisplayResolution;
+            Point origin = (res.ToVector2() * 0.5f).ToPoint();
+
+            menuBackground = new Renderer.SpriteScreen(new Layer(MainLayer.Background, -1), ContentController.Get<Texture2D>("Space3"), new Rectangle(0, res.Y / 2 - res.X / 2, res.X, res.X));
+
+            // Quickstart menu
+
+            quickStart = new GUI.Collection();
+
+            GUI.Button quickStartButton = new GUI.Button(new Rectangle(-145 + origin.X, -120 + origin.Y, 290, 80), ContentController.Get<Texture2D>("ButtonQuickstart"));
+            quickStartButton.AddEffect(ContentController.Get<SoundEffect>("Menu Blip Start"));
+            quickStartButton.OnClick += Quickstart;
+
+            GUI.Button menuButton = new GUI.Button(new Rectangle(-72 + origin.X, 40 + origin.Y, 145, 80), ContentController.Get<Texture2D>("ButtonMenu"));
+            menuButton.AddEffect(ContentController.Get<SoundEffect>("Menu Blip Click"));
+            menuButton.OnClick += Menu;
+
+            quickStart.Add(quickStartButton, menuButton);
+            RendererController.GUI.Add(quickStart);
+
+            // Main menu
+
+            mainMenu = new GUI.Collection()
+            {
+                Origin = (XNAController.DisplayResolution.ToVector2() * 0.5f).ToPoint(),
+                Active = false
+            };
+
+            #endregion
         }
 
         public void LateInitialize(XNAController systemController)
@@ -81,56 +132,122 @@ namespace Andromedroids
 
         public void Update(XNAController systemController, GameTime gameTime, float deltaTimeScaled)
         {
-            //ship.Position += Vector2.One * deltaTimeScaled;
-            //ship.Rotation += deltaTimeScaled;
-
-            if (running)
+            switch (stateManager.GameState)
             {
-                foreach (ShipPlayer player in players)
-                {
-                    player.FW_Update(key, gameTime, deltaTimeScaled);
-                }
+                case GameState.QuickMenu:
+
+
+
+                    break;
+
+                case GameState.MainMenu:
+
+
+
+                    break;
+
+                case GameState.InGame:
+
+                    switch (stateManager.Peek())
+                    {
+                        // Intro screen
+                        case 0:
+                            break;
+
+                        // Actual ingame loop
+                        case 1:
+
+                            if (aiRunning)
+                            {
+                                ++frameCount;
+
+                                foreach (PlayerManager player in players)
+                                {
+                                    player.FW_Update(key, gameTime, deltaTimeScaled);
+                                }
+                            }
+
+                            cheat.Execute();
+
+                            break;
+
+                        // Pause menu
+                        case 2:
+                            break;
+
+                        // Disqualification
+                    }
+
+
+
+                    break;
+
+                case GameState.GameIntro:
+
+
+
+                    break;
+
+                case GameState.Tournament:
+
+
+
+                    break;
+
+                case GameState.StartGame:
+
+
+
+                    break;
+
+                case GameState.Cheat:
+
+
+
+                    break;
+
+                case GameState.End:
+
+
+
+                    break;
             }
 
-            cheat.Execute();
+
         }
 
         public void Draw(XNAController systemController, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTimeScaled)
         {
-            RendererController.Draw(graphics, spriteBatch, gameTime);
+            RendererController.Draw(key, graphics, spriteBatch, gameTime);
         }
 
-        void Setup(MenuPlayer[] menuPlayers)
+        void Setup(XNAController systemController, MenuPlayer[] menuPlayers)
         {
-            players = new ShipPlayer[2] 
+            players = new PlayerManager[2] 
             {
-                (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType),
-                (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType)
+                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType)),
+                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType))
             };
 
-            string[] names = new string[]
-            {
-                menuPlayers[0].menuName,
-                menuPlayers[1].menuName
-            };
-
-            StartGame(ref players, names, 10, 2, 9);
+            StartGame(ref players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
         }
 
         void UpdateStatistics(object sender, System.Timers.ElapsedEventArgs e)
         {
-            double[] times = { players[0].FW_GetElapsedTimes(), players[1].FW_GetElapsedTimes() };
+            PlayerManager.TimeStats[] times = { players[0].FW_GetElapsedTimes(key, false), players[1].FW_GetElapsedTimes(key, false) };
         }
 
-        void StartGame(ref ShipPlayer[] players, string[] playerNames, float wuRadius, float wuMinDistance, float wuMaxDistance)
+        void StartGame(ref PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance)
         {
             if (wuRadius < wuMaxDistance)
             {
                 return;
             }
 
-            backgroundSquare = new Renderer.Sprite(ContentController.Get<Texture2D>("Square"), Vector2.Zero, RendererController.GetCamera(key).WorldUnitDiameter * Vector2.One * 20, new Color(0, 0, 20, 120), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
-            running = true;
+            stateManager.SetGameState(GameState.InGame, 0);
+
+            backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("Square"), Vector2.Zero, RendererController.GetCamera(key).WorldUnitDiameter * Vector2.One * 20, new Color(0, 0, 20, 120), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+            aiRunning = true;
 
             float startRotation = (float)r.NextDouble() * (float)Math.PI * 2;
             Vector2 startPosition;
@@ -145,8 +262,30 @@ namespace Andromedroids
 
             for (int i = 0; i < players.Length; i++)
             {
-                players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+                players[i].FW_Setup(key,  i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
             }
+        }
+
+        private void Quickstart()
+        {
+            Debug.WriteLine("Quickstart");
+
+            quickStart.Active = false;
+
+            players = new PlayerManager[2]
+            {
+                new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType)),
+                new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType))
+            };
+
+            StartGame(ref players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
+        }
+
+        private void Menu()
+        {
+            Debug.WriteLine("Main Menu");
+
+            quickStart.Active = false;
         }
 
         struct MenuPlayer
@@ -154,5 +293,6 @@ namespace Andromedroids
             public string menuName;
             public Type playerType;
         }
+
     }
 }

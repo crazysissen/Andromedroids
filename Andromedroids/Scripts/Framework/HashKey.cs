@@ -7,6 +7,9 @@ using System.Diagnostics;
 
 namespace Andromedroids
 {
+    /// <summary>
+    /// Single valid key is generated at startup
+    /// </summary>
     class HashKey
     {
         public static uint PublicKey { get; private set; } = 0;
@@ -18,6 +21,8 @@ namespace Andromedroids
         public HashKey()
         {
             key = (uint)(r.NextDouble() * 0xFFFFFFFF);
+
+            Debug.WriteLine(key.ToString("X8"));
 
             if (PublicKey == 0)
                 PublicKey = key;
@@ -40,5 +45,7 @@ namespace Andromedroids
             CheatDetection.ReportCheat("Attempt to use an invalid key. Used key: {0}, Desired key: {1}. Target method was: {2}.", key.ToString("X8"), PublicKey.ToString("X8"), targetMethod);
             return false;
         }
+
+        public static implicit operator bool (HashKey key) => key.Validate();
     }
 }

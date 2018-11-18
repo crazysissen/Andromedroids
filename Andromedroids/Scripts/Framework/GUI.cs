@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Andromedroids
 {
@@ -19,25 +20,30 @@ namespace Andromedroids
             Members = new List<IGUIMember>();
         }
 
-        public void Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime)
+        public void Draw(HashKey key, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime)
         {
-            DrawContainer(this, spriteBatch, mouse, keyboard, deltaTime, Point.Zero);
+            DrawContainer(key, this, spriteBatch, mouse, keyboard, deltaTime, Point.Zero);
         }
 
-        public static void DrawContainer(GUIContainer container, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime, Point additiveOrigin)
+        public static void DrawContainer(HashKey key, GUIContainer container, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime, Point additiveOrigin)
         {
             foreach (IGUIMember member in container.Members)
             {
                 if (member is GUIContainer)
                 {
+                    if (!(member as GUIContainer).Active)
+                    {
+                        continue;
+                    }
+
                     if (member is GUIContainerMasked)
                     {
-                        RendererController.TemporaryAddMask(member as GUIContainerMasked, additiveOrigin);
+                        RendererController.TemporaryAddMask(key, member as GUIContainerMasked, additiveOrigin);
 
                         continue;
                     }
 
-                    DrawContainer((member as GUIContainer), spriteBatch, mouse, keyboard, deltaTime, additiveOrigin + (member as GUIContainer).Origin);
+                    DrawContainer(key, (member as GUIContainer), spriteBatch, mouse, keyboard, deltaTime, additiveOrigin + (member as GUIContainer).Origin);
                 }
 
                 member.Draw(spriteBatch, mouse, keyboard, deltaTime);
@@ -65,6 +71,8 @@ namespace Andromedroids
 
     public abstract class GUIContainer
     {
+        public bool Active = true;
+
         public virtual void Add(params IGUIMember[] members)
         {
             foreach (IGUIMember member in members)
@@ -161,7 +169,7 @@ namespace Andromedroids
         public class Button : IGUIMember
         {
             const float
-                DEFAULTTRANSITIONTIME = 0.1f;
+                DEFAULTTRANSITIONTIME = 0.04f;
 
             public enum State { Idle, Hovered, Pressed }
             public enum Type { ColorSwitch, TextureSwitch, AnimatedSwitch }
@@ -191,6 +199,7 @@ namespace Andromedroids
             private Color _startColor, _targetColor;
             private Texture2D _startTexture, _targetTexture;
             private State _startState;
+            private SoundEffect effect, hoverEffect = ContentController.Get<SoundEffect>("Menu Blip Neutral");
 
             /// <summary>Testing button</summary>
             public Button(Rectangle transform)
@@ -276,6 +285,7 @@ namespace Andromedroids
                         if (onButton)
                         {
                             OnEnter?.Invoke();
+                            hoverEffect.Play();
                             if (pressed)
                             {
                                 ChangeState(State.Pressed);
@@ -300,7 +310,14 @@ namespace Andromedroids
                         {
                             ChangeState(State.Hovered);
                             if (_beginHoldOnButton)
+                            {
                                 OnClick?.Invoke();
+
+                                if (effect != null)
+                                {
+                                    effect.Play();
+                                }
+                            }
                         }
                         break;
                 }
@@ -434,6 +451,8 @@ namespace Andromedroids
 
                 _textBaseColor = baseColor;
             }
+
+            public void AddEffect(SoundEffect effect) => this.effect = effect;
 
             private static Color[] DefaultColors()
                 => new Color[] { new Color(0.9f, 0.9f, 0.9f), Color.White, new Color(0.75f, 0.75f, 0.75f) };

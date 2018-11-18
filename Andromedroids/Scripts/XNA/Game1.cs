@@ -6,7 +6,8 @@ namespace Andromedroids
 {
     public class XNAController : Game
     {
-        public static float TimeScale { get; set; }
+        public static float TimeScale { get; set; } = 1;
+        public static Point DisplayResolution => new Point(singleton.Graphics.PreferredBackBufferWidth, singleton.Graphics.PreferredBackBufferHeight);
 
         public GraphicsDeviceManager Graphics { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
@@ -27,9 +28,15 @@ namespace Andromedroids
         {
             base.Initialize();
 
-            Graphics.PreferredBackBufferWidth = 1280;
-            Graphics.PreferredBackBufferHeight = 720;
+            Mouse.SetCursor(MouseCursor.Crosshair);
+
+            //Graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            //Graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            Graphics.PreferredBackBufferWidth = 1920;
+            Graphics.PreferredBackBufferHeight = 1080;
             Graphics.ApplyChanges();
+
+            //Graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
 

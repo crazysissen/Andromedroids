@@ -39,7 +39,7 @@ namespace Andromedroids
 
         public static void ImportAll(ContentManager content)
         {
-            ContentBundle bundle = AllFileNames(AppDomain.CurrentDomain.BaseDirectory + "\\" + content.RootDirectory, "", "");
+            ContentBundle bundle = AllFileNames(AppDomain.CurrentDomain.BaseDirectory + @"\" + content.RootDirectory, "", "");
 
             foreach (ImportObject item in bundle.Objects)
             {
@@ -99,7 +99,7 @@ namespace Andromedroids
             List<ImportObject> allFiles = new List<ImportObject>();
             List<ImportCollection> allCollections = new List<ImportCollection>();
 
-            DirectoryInfo directory = new DirectoryInfo(basePath + "\\" + additionalPath);
+            DirectoryInfo directory = new DirectoryInfo(basePath + @"\" + additionalPath);
             DirectoryInfo[] directories = directory.GetDirectories();
             FileInfo[] files = directory.GetFiles();
 
@@ -110,7 +110,7 @@ namespace Andromedroids
             {
                 string currentName = Path.GetFileNameWithoutExtension(file.FullName);
 
-                if (excludeFiles.Contains(currentName))
+                if (excludeFiles.Contains(currentName) || Path.GetExtension(file.FullName) == ".wma")
                     continue;
 
                 allFiles.Add(new ImportObject(currentName, appendableAdditionalPath + currentName));
@@ -119,7 +119,7 @@ namespace Andromedroids
 
             foreach (DirectoryInfo dir in directories)
             {
-                ContentBundle dirImport = AllFileNames(basePath, dir.Name + "\\", appendableAdditionalPath + dir.Name + "/");
+                ContentBundle dirImport = AllFileNames(basePath, additionalPath + @"\" + dir.Name, appendableAdditionalPath + dir.Name + "/");
 
                 allFiles.AddRange(dirImport.Objects);
                 allCollections.AddRange(dirImport.Collections);

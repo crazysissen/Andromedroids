@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
@@ -19,32 +18,40 @@ namespace Andromedroids
         static List<Renderer> renderers = new List<Renderer>();
         static List<RMO> renderMasks = new List<RMO>();
 
-        public static void Initialize(GraphicsDeviceManager graphics, Vector2 cameraPosition, float cameraScale)
+        public static void Initialize(HashKey key, GraphicsDeviceManager graphics, Vector2 cameraPosition, float cameraScale)
         {
+            if (!key.Validate("RendererController.Initialize"))
+            {
+                return;
+            }
+
             GUI = new GUI();
 
-            Camera = new Camera()
+            Camera = new Camera(graphics)
             {
                 Position = cameraPosition,
                 Scale = cameraScale
             };
         }
 
-        public static void Draw(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime)
+        public static void Draw(HashKey key, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime)
         {
-            XNAController.Graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.DarkBlue, 0, 0);
-            System.Diagnostics.Debug.WriteLine(camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
+            if (!key.Validate("RendererController.Draw"))
+            {
+                return;
+            }
+
+            graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.DarkBlue, 0, 0);
+            //System.Diagnostics.Debug.WriteLine(Camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
 
             //camera.Scale -= (0.2f * (float)gameTime.ElapsedGameTime.TotalSeconds);
-
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
             MouseState mouseState = In.MouseState;
             KeyboardState keyboardState = In.KeyboardState;
 
             renderMasks.Clear();
 
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.PointClamp);
 
             foreach (Renderer renderer in renderers)
             {
@@ -54,7 +61,7 @@ namespace Andromedroids
                 }
             }
 
-            GUI.Draw(spriteBatch, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds);
+            GUI.Draw(key, spriteBatch, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
             spriteBatch.End();
 
@@ -98,14 +105,14 @@ namespace Andromedroids
                 spriteBatch.End();
 
                 spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, s2, null, null);
-                GUI.DrawContainer(item.mask, spriteBatch, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds, item.origin);
+                GUI.DrawContainer(key, item.mask, spriteBatch, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds, item.origin);
                 spriteBatch.End();
 
                 ++iterations;
             }
         }
 
-        public static void TemporaryAddMask(GUIContainerMasked mask, Point origin)
+        public static void TemporaryAddMask(HashKey key, GUIContainerMasked mask, Point origin)
             => renderMasks.Add(new RMO(mask, origin));
 
         public static void AddRenderer(HashKey key, Renderer renderer)
@@ -115,15 +122,16 @@ namespace Andromedroids
                 renderers.Add(renderer);
             }
         }
-        public static void RemoveRenderer(Renderer renderer)
-            => renderers.Remove(renderer);
 
         public static Camera GetCamera(HashKey key)
         {
             if (key.Validate("GetCamera"))
             {
-                return camera;
+                return Camera;
             }
+
+            return null;
+        }
 
         public static void RemoveRenderer(HashKey key, Renderer renderer)
         {
@@ -204,6 +212,18 @@ namespace Andromedroids
             /// <summary>Wether or not the sprite is flipped somehow, stack using binary OR operator (|)</summary>
             public virtual SpriteEffects Effects { get; set; }
 
+            public Sprite(Layer layer, Texture2D texture, Vector2 position)
+                : this(layer, texture, position, Vector2.One, Color.White, 0, new Vector2(0.5f, 0.5f), SpriteEffects.None)
+            { }
+
+            public Sprite(Layer layer, Texture2D texture, Vector2 position, Vector2 size)
+                : this(layer, texture, position, size, Color.White, 0, new Vector2(0.5f, 0.5f), SpriteEffects.None)
+            { }
+
+            public Sprite(Layer layer, Texture2D texture, Vector2 position, Vector2 size, Color color, float rotation)
+                : this(layer, texture, position, size, color, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None)
+            { }
+
             public Sprite(Layer layer, Texture2D texture, Vector2 position, Vector2 size, Color color, float rotation, Vector2 rotationOrigin, SpriteEffects effects)
             {
                 Layer = layer;
@@ -211,7 +231,7 @@ namespace Andromedroids
                 Position = position;
                 Size = size;
                 Rotation = rotation;
-                Origin = rotationOrigin;
+                Origin = rotationOrigin * texture.Bounds.Size.ToVector2();
                 Color = color;
                 Effects = effects;
             }
@@ -219,49 +239,6 @@ namespace Andromedroids
             public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
                 spriteBatch.Draw(Texture, camera.WorldToScreenPosition(Position), null, Color, Rotation, Origin, camera.WorldToScreenSize(Size), Effects, Layer.LayerDepth);
-            }
-        }
-
-        public class SpriteScreen : Renderer
-        {
-            /// <summary>The texture of the object</summary>
-            public virtual Texture2D Texture { get; set; }
-
-            /// <summary>The x & y coordinates of the object in world spacesummary>
-            public virtual Rectangle Transform { get; set; }
-
-            /// <summary>The rotation angle of the object measured in degrees (0-360)</summary>
-            public virtual float Rotation { get; set; }
-
-            /// <summary>A vector between (0,0) and (1,1) to represent the pivot around which the object rotates 
-            /// and what point will line up to the Vector2 position</summary>
-            public virtual Vector2 Origin { get; set; }
-
-            /// <summary>The color multiplier of the object</summary>
-            public virtual Color Color { get; set; }
-
-            /// <summary> Wether or not the sprite is flipped somehow, stack using binary OR operator (|)</summary>
-            public virtual SpriteEffects Effects { get; set; }
-
-            public override Layer Layer { get; set; }
-
-            public SpriteScreen(Texture2D texture, Rectangle transform) : this(texture, transform, Color.White, 0, Vector2.Zero, SpriteEffects.None) { }
-
-            public SpriteScreen(Texture2D texture, Rectangle transform, Color color) : this(texture, transform, color, 0, Vector2.Zero, SpriteEffects.None) { }
-
-            public SpriteScreen(Texture2D texture, Rectangle transform, Color color, float rotation, Vector2 rotationOrigin, SpriteEffects effects)
-            {
-                Texture = texture;
-                Transform = transform;
-                Rotation = rotation;
-                Origin = rotationOrigin;
-                Color = color;
-                Effects = effects;
-            }
-
-            public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
-            {
-                spriteBatch.Draw(Texture, camera.WorldToScreenPosition(Position), null, Color, Rotation * DEGTORAD, Origin, camera.WorldToScreenSize(Size), Effects, Layer.LayerDepth);
             }
         }
 
@@ -557,10 +534,10 @@ namespace Andromedroids
     {
         // A square based on the average distances to the screen edges, divided into pieces
         const float
-            UNIVERSALMODIFIER = 0.1f;
+            UNIVERSALMODIFIER = 2f;
 
         public const int
-            WORLDUNITPIXELS = 1500; 
+            WORLDUNITPIXELS = 16; 
 
         public Vector2 Position { get; set; }
         public float Scale { get; set; }
@@ -597,33 +574,6 @@ namespace Andromedroids
 
         public Vector2 ScreenToWorldSize(Vector2 size)
             => size / (UNIVERSALMODIFIER * Scale);
-    }
-
-    public struct Layer
-    {
-        public enum Main
-        {
-            AbsoluteBottom, Background, Main, Overlay, GUI, AbsoluteTop
-        }
-
-        public const int
-            MAINCOUNT = 6;
-
-        public const float
-            LAYERINTERVAL = float.Epsilon,
-            MAININTERVAL = 1 / MAINCOUNT,
-            HALFINTERVAL = MAININTERVAL * 0.5f;
-
-        public float LayerDepth => 1 - ((int)main * MAININTERVAL + HALFINTERVAL + LAYERINTERVAL * layer);
-
-        public Main main;
-        public int layer;
-
-        public Layer(Main main, int layer)
-        {
-            this.main = main;
-            this.layer = layer;
-        }
     }
 
     public enum MainLayer
