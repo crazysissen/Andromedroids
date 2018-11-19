@@ -15,7 +15,7 @@ namespace Andromedroids
 
         public enum Type
         {
-            GatlingGun = 0, RocketLauncher = 1, CaliberCannon = 2, Minelayer = 3, PlasmaThrower = 4, GuidedMissile = 5, Nuclear
+            GatlingGun = 0, RocketLauncher = 1, CaliberCannon = 2/*, Minelayer = 3, PlasmaThrower = 4, GuidedMissile = 5, Nuclear*/
         }
     }
 }

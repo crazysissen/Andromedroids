@@ -42,7 +42,7 @@ namespace Andromedroids
             }
 
             graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.DarkBlue, 0, 0);
-            //System.Diagnostics.Debug.WriteLine(Camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
+            System.Diagnostics.Debug.WriteLine(Camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
 
             //camera.Scale -= (0.2f * (float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -51,7 +51,7 @@ namespace Andromedroids
 
             renderMasks.Clear();
 
-            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.PointClamp);
+            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.PointWrap);
 
             foreach (Renderer renderer in renderers)
             {
@@ -534,10 +534,10 @@ namespace Andromedroids
     {
         // A square based on the average distances to the screen edges, divided into pieces
         const float
-            UNIVERSALMODIFIER = 2f;
+            UNIVERSALMODIFIER = 0.7f;
 
         public const int
-            WORLDUNITPIXELS = 16; 
+            WORLDUNITPIXELS = 64; 
 
         public Vector2 Position { get; set; }
         public float Scale { get; set; }
@@ -564,16 +564,16 @@ namespace Andromedroids
         }
 
         public Vector2 WorldToScreenPosition(Vector2 worldPosition)
-            => CenterCoordinate + (worldPosition - Position) * _standardSquareDiameter * _standardWUScaling * Scale * UNIVERSALMODIFIER;
+            => CenterCoordinate + (worldPosition - Position) * _standardSquareDiameter * 0.5f * Scale * UNIVERSALMODIFIER;
 
         public Vector2 ScreenToWorldPosition(Vector2 screenPosition)
-            => (screenPosition - CenterCoordinate) / (_standardSquareDiameter * _standardWUScaling * Scale * UNIVERSALMODIFIER) + Position;
+            => (screenPosition - CenterCoordinate) / (_standardSquareDiameter * 0.5f * Scale * UNIVERSALMODIFIER) + Position;
 
         public Vector2 WorldToScreenSize(Vector2 size)
-            => size * UNIVERSALMODIFIER * Scale;
+            => size * UNIVERSALMODIFIER * _standardWUScaling * Scale;
 
         public Vector2 ScreenToWorldSize(Vector2 size)
-            => size / (UNIVERSALMODIFIER * Scale);
+            => size / (UNIVERSALMODIFIER * Scale * _standardWUScaling);
     }
 
     public enum MainLayer

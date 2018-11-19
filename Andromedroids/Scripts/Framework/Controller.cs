@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
@@ -18,8 +19,13 @@ namespace Andromedroids
             MINSPAWNDISTANCE = 6,
             MAXSPAWNDISTANCE = 12;
 
+        const float
+            INTROTIME = 5.0f,
+            ZOOMOUTTIME = 0.8f;
+
         private static CheatDetection cheat;
 
+        private Song menuMusic, ingameMusic, tournamentMusic;
         private StateManager stateManager;
         private Renderer.SpriteScreen menuBackground;
         private Random r;
@@ -29,14 +35,16 @@ namespace Andromedroids
         private XNAController controller;
 
         private GUI.Collection quickStart, mainMenu;
+        private GUI.Collection[] playerStatWindows;
 
         // Ingame variables
 
         private int frameCount;
-        private bool aiRunning;
+        private bool aiRunning, introOver;
         private float startCountdown;
         private PlayerManager[] players;
         private Renderer.Sprite backgroundSquare;
+        private List<Renderer.Sprite> tiles = new List<Renderer.Sprite>();
 
 
         public MainController(XNAController systemController)
@@ -60,6 +68,9 @@ namespace Andromedroids
 
             menuPlayers = new List<MenuPlayer>();
             quickstartPlayers = new List<MenuPlayer>();
+            ingameMusic = ContentController.Get<Song>("Andromedroids");
+            menuMusic = ContentController.Get<Song>("AndromedroidsMenu");
+            tournamentMusic = ContentController.Get<Song>("AndromedroidsBright");
 
             Scoreboard board = Scoreboard.ImportFromFile("Hellothere");
 
@@ -148,10 +159,23 @@ namespace Andromedroids
 
                 case GameState.InGame:
 
+                    RendererController.GetCamera(key).Scale *= (1 - deltaTimeScaled  * 0.3f);
+
                     switch (stateManager.Peek())
                     {
                         // Intro screen
                         case 0:
+                            //(new Vector2()).
+                            //startCountdown += deltaTimeScaled;
+
+                            if (startCountdown > INTROTIME)
+                            {
+                                if (!introOver)
+                                {
+
+                                }
+                            }
+
                             break;
 
                         // Actual ingame loop
@@ -246,8 +270,25 @@ namespace Andromedroids
 
             stateManager.SetGameState(GameState.InGame, 0);
 
-            backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("Square"), Vector2.Zero, RendererController.GetCamera(key).WorldUnitDiameter * Vector2.One * 20, new Color(0, 0, 20, 120), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+            MediaPlayer.Play(ingameMusic);
+
+            backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
             aiRunning = true;
+
+            Texture2D square = ContentController.Get<Texture2D>("Square");
+
+            //for (float x = -wuRadius + 0.5f; x < wuRadius; ++x)
+            //{
+            //    for (float y = -wuRadius + 0.5f; y < wuRadius; ++y)
+            //    {
+            //        float aX = x + wuRadius, aY = y + wuRadius;
+
+            //        if (((int)aX % 2 == 0 && (int)aY % 2 == 0) || ((int)aX % 2 == 1 && (int)aY % 2 == 1))
+            //        {
+            //            tiles.Add(new Renderer.Sprite(new Layer(MainLayer.Background, 0), square, new Vector2(x, y), Vector2.One * Camera.WORLDUNITPIXELS, new Color(0, 0, 15, 255), 0));
+            //        }
+            //    }
+            //}
 
             float startRotation = (float)r.NextDouble() * (float)Math.PI * 2;
             Vector2 startPosition;
@@ -260,7 +301,7 @@ namespace Andromedroids
 
             Debug.Write(startPosition);
 
-            for (int i = 0; i < players.Length; i++)
+            for (int i = 0; i < players.Length; ++i)
             {
                 players[i].FW_Setup(key,  i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
             }
