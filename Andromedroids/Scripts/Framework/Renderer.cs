@@ -41,8 +41,8 @@ namespace Andromedroids
                 return;
             }
 
-            graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.DarkBlue, 0, 0);
-            System.Diagnostics.Debug.WriteLine(Camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
+            graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.Transparent, 0, 0);
+            //System.Diagnostics.Debug.WriteLine(Camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
 
             //camera.Scale -= (0.2f * (float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -51,7 +51,9 @@ namespace Andromedroids
 
             renderMasks.Clear();
 
-            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.PointWrap);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointWrap);
+
+            renderers = renderers.OrderBy(o => o.Layer.LayerDepth).ToList();
 
             foreach (Renderer renderer in renderers)
             {
@@ -578,20 +580,20 @@ namespace Andromedroids
 
     public enum MainLayer
     {
-        Background, Main, Overlay, GUI
+        Background, Main, Overlay, GUI, AbsoluteTop
     }
 
     public struct Layer
     {
         public const int
-            MAINCOUNT = 4;
+            MAINCOUNT = 5;
 
         public const float
             LAYERINTERVAL = float.Epsilon,
-            MAININTERVAL = 1 / MAINCOUNT,
+            MAININTERVAL = 1.0f / (MAINCOUNT + 1),
             HALFINTERVAL = MAININTERVAL * 0.5f;
 
-        public float LayerDepth => 1 - ((int)main * MAININTERVAL + HALFINTERVAL + LAYERINTERVAL * layer);
+        public float LayerDepth => /*1 - */((int)main * MAININTERVAL + HALFINTERVAL + LAYERINTERVAL * layer);
 
         public MainLayer main;
         public int layer;

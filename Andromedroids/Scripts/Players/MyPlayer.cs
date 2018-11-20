@@ -28,8 +28,8 @@ namespace Andromedroids
             {
                 Name        = "My Player",              // Ingame display name
                 Description = "Description.",           // Ship description
-                HullColor   = new Color(200, 200, 200, 50),
-                DecalColor  = new Color(20, 20, 20, 50),
+                HullColor   = new Color(200, 200, 200),
+                DecalColor  = new Color(0, 0, 50),
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
                 {
                     Weapon.StartType.CaliberCannon,

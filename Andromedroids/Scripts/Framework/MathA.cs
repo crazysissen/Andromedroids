@@ -22,11 +22,24 @@ namespace Andromedroids
             float sin = (float)Math.Sin(radian);
             float cos = (float)Math.Cos(radian);
 
-            float tx = vector.X;
-            float ty = vector.Y;
-            vector.X = (cos * tx) - (sin * ty);
-            vector.Y = (sin * tx) + (cos * ty);
+            vector = new Vector2()
+            {
+                X = (cos * vector.X) - (sin * vector.Y),
+                Y = (sin * vector.X) + (cos * vector.Y)
+            };
+            
             return vector;
+        }
+
+        public static float Clamp(this float value, float min, float max)
+        {
+            if (value > max)
+                return max;
+
+            if (value < min)
+                return min;
+
+            return value;
         }
     }
 }

@@ -87,8 +87,7 @@ namespace Andromedroids
                 CreateThread();
 
                 Texture2D texture = ContentController.Get<Texture2D>(config.Class.ToString());
-                NewTexture(ref texture, PlayerHullColor, PlayerDecalColor);
-                PlayerTexture = texture;
+                PlayerTexture = NewTexture(texture, PlayerHullColor, PlayerDecalColor);
 
                 renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
             }
@@ -187,8 +186,10 @@ namespace Andromedroids
             };
         }
 
-        private void NewTexture(ref Texture2D sprite, Color hullColor, Color decalColor)
+        private Texture2D NewTexture(Texture2D sprite, Color hullColor, Color decalColor)
         {
+            Texture2D newTexture = new Texture2D(controller.GraphicsDevice, sprite.Width, sprite.Height);
+
             Color[] colors = new Color[sprite.Height * sprite.Width];
             sprite.GetData(colors);
 
@@ -213,10 +214,12 @@ namespace Andromedroids
                     continue;
                 }
 
-                colors[i] = Color.White;
+                //colors[i] = Color.White;
             }
 
-            sprite.SetData(colors);
+            newTexture.SetData(colors);
+
+            return newTexture;
         }
 
         public struct TimeStats

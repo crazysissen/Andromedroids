@@ -60,6 +60,7 @@
     <Compile Include="Scripts\Framework\ManagedWorldObject.cs" />
     <Compile Include="Scripts\Framework\MathA.cs" />
     <Compile Include="Scripts\Framework\Scoreboard.cs" />
+    <Compile Include="Scripts\Framework\StatWindow.cs" />
     <Compile Include="Scripts\Players\MyPlayer.cs" />
     <Compile Include="Scripts\Framework\Renderer.cs" />
     <Compile Include="Scripts\Framework\ShipPlayer.cs" />

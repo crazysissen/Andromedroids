@@ -21,18 +21,22 @@ namespace Andromedroids
 
         const float
             INTROTIME = 5.0f,
-            ZOOMOUTTIME = 0.8f;
+            ZOOMOUTTIME = 0.5f,
+            CAMERAOFFSETPROPORTION = 7.0f / 18.0f;
 
         private static CheatDetection cheat;
 
-        private Song menuMusic, ingameMusic, tournamentMusic;
+        private Action transitionStart;
+        private float transitionCountdown, transitionTarget;
+        private Song menuMusic, ingameMusic, tournamentMusic, targetSong;
         private StateManager stateManager;
-        private Renderer.SpriteScreen menuBackground;
+        private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private Random r;
         private HashKey key;
         private List<MenuPlayer> menuPlayers, quickstartPlayers;
         private System.Timers.Timer timer;
         private XNAController controller;
+        private GameState endState;
 
         private GUI.Collection quickStart, mainMenu;
         private GUI.Collection[] playerStatWindows;
@@ -40,12 +44,10 @@ namespace Andromedroids
         // Ingame variables
 
         private int frameCount;
-        private bool aiRunning, introOver;
+        private bool aiRunning;
         private float startCountdown;
         private PlayerManager[] players;
         private Renderer.Sprite backgroundSquare;
-        private List<Renderer.Sprite> tiles = new List<Renderer.Sprite>();
-
 
         public MainController(XNAController systemController)
         {
@@ -73,6 +75,8 @@ namespace Andromedroids
             tournamentMusic = ContentController.Get<Song>("AndromedroidsBright");
 
             Scoreboard board = Scoreboard.ImportFromFile("Hellothere");
+
+            MediaPlayer.IsRepeating = true;
 
             // Importing all players using the ShipAI attribute
             Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
@@ -107,8 +111,11 @@ namespace Andromedroids
 
             Point res = XNAController.DisplayResolution;
             Point origin = (res.ToVector2() * 0.5f).ToPoint();
+            Rectangle screenCover = new Rectangle(0, res.Y / 2 - res.X / 2, res.X, res.X);
 
-            menuBackground = new Renderer.SpriteScreen(new Layer(MainLayer.Background, -1), ContentController.Get<Texture2D>("Space3"), new Rectangle(0, res.Y / 2 - res.X / 2, res.X, res.X));
+            transitionOverlay = new Renderer.SpriteScreen(new Layer(MainLayer.AbsoluteTop, 0), ContentController.Get<Texture2D>("Space2"), screenCover, new Color(20, 20, 20, 0));
+
+            menuBackground = new Renderer.SpriteScreen(new Layer(MainLayer.Background, -1), ContentController.Get<Texture2D>("Space3"), screenCover, new Color(0.8f, 0.8f, 0.8f, 1.0f));
 
             // Quickstart menu
 
@@ -165,15 +172,21 @@ namespace Andromedroids
                     {
                         // Intro screen
                         case 0:
-                            //(new Vector2()).
-                            //startCountdown += deltaTimeScaled;
 
-                            if (startCountdown > INTROTIME)
+                            startCountdown += deltaTimeScaled;
+
+                            if (startCountdown < INTROTIME)
                             {
-                                if (!introOver)
-                                {
+                                float progress = startCountdown / INTROTIME;
+                            }
+                            
+                            if (startCountdown > INTROTIME && startCountdown < INTROTIME + ZOOMOUTTIME)
+                            {
+                                float
+                                    progress = (startCountdown - INTROTIME) / ZOOMOUTTIME,
+                                    sine = MathA.SineA(progress);
 
-                                }
+
                             }
 
                             break;
@@ -200,13 +213,9 @@ namespace Andromedroids
                             break;
 
                         // Disqualification
+                        case 3:
+                            break;
                     }
-
-
-
-                    break;
-
-                case GameState.GameIntro:
 
 
 
@@ -224,9 +233,51 @@ namespace Andromedroids
 
                     break;
 
-                case GameState.Cheat:
+                case GameState.Transition:
 
+                    int state = stateManager.Peek();
+                    transitionCountdown += deltaTimeScaled;
 
+                    if (state == 0)
+                    {
+                        float sine = MathA.SineA(transitionCountdown / transitionTarget);
+
+                        transitionOverlay.Color = new Color(transitionOverlay.Color, sine);
+
+                        if (MediaPlayer.State == MediaState.Playing)
+                        {
+                            MediaPlayer.Volume = 1 - sine;
+                        }
+
+                        if (transitionCountdown > transitionTarget)
+                        {
+                            transitionStart?.Invoke();
+                            stateManager.StackSubState(1);
+                            transitionCountdown -= transitionTarget;
+
+                            MediaPlayer.Volume = 1;
+
+                            if (targetSong != null)
+                            {
+                                MediaPlayer.Play(targetSong);
+                            }
+                        }
+                    }
+
+                    if (state == 1)
+                    {
+                        float sine = 1 - MathA.SineD(transitionCountdown / transitionTarget);
+
+                        transitionOverlay.Color = new Color(transitionOverlay.Color, sine);
+
+                        if (transitionCountdown > transitionTarget)
+                        {
+                            stateManager.SetGameState(endState, 0);
+                            transitionCountdown = 0;
+
+                            transitionOverlay.Color = new Color(transitionOverlay.Color, 0.0f);
+                        }
+                    }
 
                     break;
 
@@ -267,8 +318,6 @@ namespace Andromedroids
             {
                 return;
             }
-
-            stateManager.SetGameState(GameState.InGame, 0);
 
             MediaPlayer.Play(ingameMusic);
 
@@ -313,6 +362,11 @@ namespace Andromedroids
 
             quickStart.Active = false;
 
+            TransitionState(GameState.InGame, 0.5f, ActivateQuickstart);
+        }
+
+        private void ActivateQuickstart()
+        {
             players = new PlayerManager[2]
             {
                 new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType)),
@@ -327,6 +381,17 @@ namespace Andromedroids
             Debug.WriteLine("Main Menu");
 
             quickStart.Active = false;
+        }
+
+        private void TransitionState(GameState endState, float transitionTime, Action stateStart)
+        {
+            this.endState = endState;
+
+            transitionStart = stateStart;
+            transitionTarget = transitionTime * 0.5f;
+            transitionCountdown = 0;
+
+            stateManager.SetGameState(GameState.Transition, 0);
         }
 
         struct MenuPlayer
