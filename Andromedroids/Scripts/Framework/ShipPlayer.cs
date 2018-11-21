@@ -168,12 +168,12 @@ namespace Andromedroids
 
             while (run)
             {
+                frameStart.WaitOne(3);
+
                 Player.Update();
 
                 ++currentFrameCount;
                 double elapsed = stopwatch.Elapsed.TotalMilliseconds;
-
-                frameStart.WaitOne(3);
             }
 
         }
@@ -252,9 +252,7 @@ namespace Andromedroids
 
     public struct Configuration
     {
-        public float thrusterPower, steeringPower, shieldPower;
+        public float targetRotation, thrusterPower, steeringPower, shieldPower;
         public float[] weaponPower;
-
-        public Vector2 targetVelocity;
     }
 }

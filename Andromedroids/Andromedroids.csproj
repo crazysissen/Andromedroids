@@ -80,7 +80,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="GraphicsNotes.txt" />
     <Content Include="Icon.ico" />
     <None Include="ClassDiagram.cd" />
     <None Include="Resources\Icon.ico" />

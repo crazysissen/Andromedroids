@@ -47,6 +47,7 @@ namespace Andromedroids
         private bool aiRunning;
         private float startCountdown;
         private PlayerManager[] players;
+        private StatWindow[] statWindows;
         private Renderer.Sprite backgroundSquare;
 
         public MainController(XNAController systemController)
@@ -350,9 +351,12 @@ namespace Andromedroids
 
             Debug.Write(startPosition);
 
+            statWindows = new StatWindow[2];
+
             for (int i = 0; i < players.Length; ++i)
             {
-                players[i].FW_Setup(key,  i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+                players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+                statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(400, 400 + 440 * i, 240, 430));
             }
         }
 
