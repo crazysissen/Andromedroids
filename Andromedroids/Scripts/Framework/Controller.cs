@@ -30,7 +30,6 @@ namespace Andromedroids
         private float transitionCountdown, transitionTarget;
         private Song menuMusic, ingameMusic, tournamentMusic, targetSong;
         private StateManager stateManager;
-        private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private Random r;
         private HashKey key;
         private List<MenuPlayer> menuPlayers, quickstartPlayers;
@@ -38,8 +37,11 @@ namespace Andromedroids
         private XNAController controller;
         private GameState endState;
 
+        // Main menu
+
+        private Renderer.Text text;
+        private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private GUI.Collection quickStart, mainMenu;
-        private GUI.Collection[] playerStatWindows;
 
         // Ingame variables
 
@@ -49,6 +51,7 @@ namespace Andromedroids
         private PlayerManager[] players;
         private StatWindow[] statWindows;
         private Renderer.Sprite backgroundSquare;
+        private GUI.Collection[] playerStatWindows;
 
         public MainController(XNAController systemController)
         {
@@ -74,6 +77,8 @@ namespace Andromedroids
             ingameMusic = ContentController.Get<Song>("Andromedroids");
             menuMusic = ContentController.Get<Song>("AndromedroidsMenu");
             tournamentMusic = ContentController.Get<Song>("AndromedroidsBright");
+
+            text = new Renderer.Text(new Layer(MainLayer.GUI, 1), ContentController.Get<SpriteFont>("Thin"), "Hello", 12, 0, new Vector2(5, 5));
 
             Scoreboard board = Scoreboard.ImportFromFile("Hellothere");
 
