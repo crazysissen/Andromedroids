@@ -160,7 +160,7 @@ namespace Andromedroids
     {
         const float
             DEGTORAD = (2 * (float)Math.PI) / 360,
-            FONTSIZEMULTIPLIER = 1 / 12;
+            FONTSIZEMULTIPLIER = 1.0f / 12.0f;
 
         /// <summary>Whether or not the object should be drawn automatically</summary>
         public virtual bool Automatic { get; set; } = true;

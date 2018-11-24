@@ -14,7 +14,7 @@ namespace Andromedroids
         public Rectangle Rectangle { get; set; }
 
         // Unused, Thruster, Maneuvering, Shield, Weapon (1-6), 
-        readonly Color[] powerColors =
+        readonly Color[] powerColors = 
         {
             new Color()
         };
@@ -62,6 +62,7 @@ namespace Andromedroids
                 }
 
                 panelSprite = new Texture2D(controller.GraphicsDevice, defaultPanel.Width, defaultPanel.Height);
+                panelSprite.SetData(colors);
 
                 panel = new Renderer.SpriteScreen(new Layer(MainLayer.GUI, 1), panelSprite, rectangle);
 
@@ -76,7 +77,7 @@ namespace Andromedroids
 
         private Vector2 TextPosition(int order)
         {
-            Vector2 origin = Rectangle.Location.ToVector2() + new Vector2(Rectangle.Width * 0.08f, Rectangle.Height * 0.35f);
+            Vector2 origin = Rectangle.Location.ToVector2() + new Vector2(Rectangle.Width * 0.08f, Rectangle.Height * 0.5f);
 
             return origin + new Vector2(0, -textSize * 1.1f) * order;
         }

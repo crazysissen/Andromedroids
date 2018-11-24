@@ -39,7 +39,6 @@ namespace Andromedroids
 
         // Main menu
 
-        private Renderer.Text text;
         private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private GUI.Collection quickStart, mainMenu;
 
@@ -77,8 +76,6 @@ namespace Andromedroids
             ingameMusic = ContentController.Get<Song>("Andromedroids");
             menuMusic = ContentController.Get<Song>("AndromedroidsMenu");
             tournamentMusic = ContentController.Get<Song>("AndromedroidsBright");
-
-            text = new Renderer.Text(new Layer(MainLayer.GUI, 1), ContentController.Get<SpriteFont>("Thin"), "Hello", 12, 0, new Vector2(5, 5));
 
             Scoreboard board = Scoreboard.ImportFromFile("Hellothere");
 
@@ -361,7 +358,7 @@ namespace Andromedroids
             for (int i = 0; i < players.Length; ++i)
             {
                 players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
-                statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(400, 400 + 440 * i, 240, 430));
+                statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
             }
         }
 
