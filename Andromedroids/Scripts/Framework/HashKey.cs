@@ -10,7 +10,7 @@ namespace Andromedroids
     /// <summary>
     /// Single valid key is generated at startup
     /// </summary>
-    class HashKey
+    public class HashKey
     {
         public static uint PublicKey { get; private set; } = 0;
 

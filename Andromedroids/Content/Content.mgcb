@@ -219,144 +219,6 @@
 /processorParam:TextureFormat=Color
 /build:Ships/Scorpion.png
 
-#begin Sound/SFX/Escape Long.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Escape Long.wav
-
-#begin Sound/SFX/Escape Short.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Escape Short.wav
-
-#begin Sound/SFX/Explode Echo.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Explode Echo.wav
-
-#begin Sound/SFX/Explode Long.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Explode Long.wav
-
-#begin Sound/SFX/Explode Medium.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Explode Medium.wav
-
-#begin Sound/SFX/Explode Short.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Explode Short.wav
-
-#begin Sound/SFX/Hit Hard.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Hit Hard.wav
-
-#begin Sound/SFX/Hit Impact.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Hit Impact.wav
-
-#begin Sound/SFX/Hit Medium.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Hit Medium.wav
-
-#begin Sound/SFX/Hit Short.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Hit Short.wav
-
-#begin Sound/SFX/Menu Blip Back.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Menu Blip Back.wav
-
-#begin Sound/SFX/Menu Blip Click.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Menu Blip Click.wav
-
-#begin Sound/SFX/Menu Blip Exit.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Menu Blip Exit.wav
-
-#begin Sound/SFX/Menu Blip Neutral.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Menu Blip Neutral.wav
-
-#begin Sound/SFX/Menu Blip Start.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Menu Blip Start.wav
-
-#begin Sound/SFX/Pickup Long.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Pickup Long.wav
-
-#begin Sound/SFX/Pickup Short.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Pickup Short.wav
-
-#begin Sound/SFX/Powerup Electric.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Powerup Electric.wav
-
-#begin Sound/SFX/Powerup Medium.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Powerup Medium.wav
-
-#begin Sound/SFX/Powerup Minor.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Powerup Minor.wav
-
-#begin Sound/SFX/Powerup Wobble.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Powerup Wobble.wav
-
-#begin Sound/SFX/Sucess.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Sucess.wav
-
-#begin Sound/SFX/Pickup Long 2.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/Pickup Long 2.wav
-
 #begin SquareMask.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -392,4 +254,190 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:StatWindow.png
+
+#begin Sound/SFX/EscapeLong.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/EscapeLong.wav
+
+#begin Sound/SFX/EscapeShort.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/EscapeShort.wav
+
+#begin Sound/SFX/ExplodeEcho.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/ExplodeEcho.wav
+
+#begin Sound/SFX/ExplodeLong.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/ExplodeLong.wav
+
+#begin Sound/SFX/ExplodeMedium.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/ExplodeMedium.wav
+
+#begin Sound/SFX/ExplodeShort.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/ExplodeShort.wav
+
+#begin Sound/SFX/HitHard.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/HitHard.wav
+
+#begin Sound/SFX/HitImpact.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/HitImpact.wav
+
+#begin Sound/SFX/HitMedium.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/HitMedium.wav
+
+#begin Sound/SFX/HitShort.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/HitShort.wav
+
+#begin Sound/SFX/MenuBlipBack.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/MenuBlipBack.wav
+
+#begin Sound/SFX/MenuBlipClick.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/MenuBlipClick.wav
+
+#begin Sound/SFX/MenuBlipExit.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/MenuBlipExit.wav
+
+#begin Sound/SFX/MenuBlipNeutral.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/MenuBlipNeutral.wav
+
+#begin Sound/SFX/MenuBlipStart.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/MenuBlipStart.wav
+
+#begin Sound/SFX/PickupLong 2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PickupLong 2.wav
+
+#begin Sound/SFX/PickupLong.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PickupLong.wav
+
+#begin Sound/SFX/PickupShort.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PickupShort.wav
+
+#begin Sound/SFX/PowerupElectric.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PowerupElectric.wav
+
+#begin Sound/SFX/PowerupMedium.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PowerupMedium.wav
+
+#begin Sound/SFX/PowerupMinor.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PowerupMinor.wav
+
+#begin Sound/SFX/PowerupWobble.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PowerupWobble.wav
+
+#begin Sound/SFX/Sucess.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/Sucess.wav
+
+#begin Buttons/Speed0.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Buttons/Speed0.png
+
+#begin Buttons/Speed1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Buttons/Speed1.png
+
+#begin Buttons/Speed2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Buttons/Speed2.png
+
+#begin Buttons/Speed3.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Buttons/Speed3.png
 

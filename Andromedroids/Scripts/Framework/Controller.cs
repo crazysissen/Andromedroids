@@ -19,11 +19,6 @@ namespace Andromedroids
             MINSPAWNDISTANCE = 6,
             MAXSPAWNDISTANCE = 12;
 
-        const float
-            INTROTIME = 5.0f,
-            ZOOMOUTTIME = 0.5f,
-            CAMERAOFFSETPROPORTION = 7.0f / 18.0f;
-
         private static CheatDetection cheat;
 
         private Action transitionStart;
@@ -33,7 +28,6 @@ namespace Andromedroids
         private Random r;
         private HashKey key;
         private List<MenuPlayer> menuPlayers, quickstartPlayers;
-        private System.Timers.Timer timer;
         private XNAController controller;
         private GameState endState;
 
@@ -44,13 +38,7 @@ namespace Andromedroids
 
         // Ingame variables
 
-        private int frameCount;
-        private bool aiRunning;
-        private float startCountdown;
-        private PlayerManager[] players;
-        private StatWindow[] statWindows;
-        private Renderer.Sprite backgroundSquare;
-        private GUI.Collection[] playerStatWindows;
+        GameController gameController;
 
         public MainController(XNAController systemController)
         {
@@ -64,9 +52,7 @@ namespace Andromedroids
             r = new Random();
             cheat = new CheatDetection();
             stateManager = new StateManager(GameState.QuickMenu, 0);
-            timer = new System.Timers.Timer(500);
             controller = systemController;
-            timer.Elapsed += UpdateStatistics;
 
             RendererController.Initialize(key, systemController.Graphics, new Vector2(0, 0), 1f);
             Renderer.SetKey(key);
@@ -153,6 +139,8 @@ namespace Andromedroids
 
         public void Update(XNAController systemController, GameTime gameTime, float deltaTimeScaled)
         {
+            int state = stateManager.Peek();
+
             switch (stateManager.GameState)
             {
                 case GameState.QuickMenu:
@@ -171,56 +159,12 @@ namespace Andromedroids
 
                     RendererController.GetCamera(key).Scale *= (1 - deltaTimeScaled  * 0.3f);
 
-                    switch (stateManager.Peek())
+                    if (gameController != null)
                     {
-                        // Intro screen
-                        case 0:
-
-                            startCountdown += deltaTimeScaled;
-
-                            if (startCountdown < INTROTIME)
-                            {
-                                float progress = startCountdown / INTROTIME;
-                            }
-                            
-                            if (startCountdown > INTROTIME && startCountdown < INTROTIME + ZOOMOUTTIME)
-                            {
-                                float
-                                    progress = (startCountdown - INTROTIME) / ZOOMOUTTIME,
-                                    sine = MathA.SineA(progress);
-
-
-                            }
-
-                            break;
-
-                        // Actual ingame loop
-                        case 1:
-
-                            if (aiRunning)
-                            {
-                                ++frameCount;
-
-                                foreach (PlayerManager player in players)
-                                {
-                                    player.FW_Update(key, gameTime, deltaTimeScaled);
-                                }
-                            }
-
-                            cheat.Execute();
-
-                            break;
-
-                        // Pause menu
-                        case 2:
-                            break;
-
-                        // Disqualification
-                        case 3:
-                            break;
+                        gameController.Update(this, systemController, gameTime, deltaTimeScaled);
                     }
 
-
+                    cheat.Execute();
 
                     break;
 
@@ -238,7 +182,6 @@ namespace Andromedroids
 
                 case GameState.Transition:
 
-                    int state = stateManager.Peek();
                     transitionCountdown += deltaTimeScaled;
 
                     if (state == 0)
@@ -301,65 +244,24 @@ namespace Andromedroids
 
         void Setup(XNAController systemController, MenuPlayer[] menuPlayers)
         {
-            players = new PlayerManager[2] 
+            PlayerManager[] players = new PlayerManager[2] 
             {
                 new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType)),
                 new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType))
             };
 
-            StartGame(ref players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
+            StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
         }
 
-        void UpdateStatistics(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            PlayerManager.TimeStats[] times = { players[0].FW_GetElapsedTimes(key, false), players[1].FW_GetElapsedTimes(key, false) };
-        }
-
-        void StartGame(ref PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance)
+        void StartGame(PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance)
         {
             if (wuRadius < wuMaxDistance)
             {
                 return;
             }
 
-            MediaPlayer.Play(ingameMusic);
-
-            backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
-            aiRunning = true;
-
-            Texture2D square = ContentController.Get<Texture2D>("Square");
-
-            //for (float x = -wuRadius + 0.5f; x < wuRadius; ++x)
-            //{
-            //    for (float y = -wuRadius + 0.5f; y < wuRadius; ++y)
-            //    {
-            //        float aX = x + wuRadius, aY = y + wuRadius;
-
-            //        if (((int)aX % 2 == 0 && (int)aY % 2 == 0) || ((int)aX % 2 == 1 && (int)aY % 2 == 1))
-            //        {
-            //            tiles.Add(new Renderer.Sprite(new Layer(MainLayer.Background, 0), square, new Vector2(x, y), Vector2.One * Camera.WORLDUNITPIXELS, new Color(0, 0, 15, 255), 0));
-            //        }
-            //    }
-            //}
-
-            float startRotation = (float)r.NextDouble() * (float)Math.PI * 2;
-            Vector2 startPosition;
-
-            do
-            {
-                startPosition = new Vector2((float)r.NextDouble() * wuMaxDistance * 2 - wuMaxDistance, (float)r.NextDouble() * wuMaxDistance * 2 - wuMaxDistance);
-            }
-            while (Vector2.Distance(Vector2.Zero, startPosition) < wuMinDistance);
-
-            Debug.Write(startPosition);
-
-            statWindows = new StatWindow[2];
-
-            for (int i = 0; i < players.Length; ++i)
-            {
-                players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
-                statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
-            }
+            gameController = new GameController(key);
+            gameController.Initialize(controller, ingameMusic, players, wuRadius, wuMinDistance, wuMaxDistance);
         }
 
         private void Quickstart()
@@ -373,13 +275,13 @@ namespace Andromedroids
 
         private void ActivateQuickstart()
         {
-            players = new PlayerManager[2]
+            PlayerManager[] players = new PlayerManager[2]
             {
                 new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType)),
                 new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType))
             };
 
-            StartGame(ref players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
+            StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
         }
 
         private void Menu()
@@ -387,6 +289,13 @@ namespace Andromedroids
             Debug.WriteLine("Main Menu");
 
             quickStart.Active = false;
+
+            TransitionState(GameState.MainMenu, 1, ActivateMenu);
+        }
+
+        private void ActivateMenu()
+        {
+            MediaPlayer.Play(menuMusic);
         }
 
         private void TransitionState(GameState endState, float transitionTime, Action stateStart)

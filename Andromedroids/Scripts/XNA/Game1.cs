@@ -4,9 +4,17 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
+    /// <summary>
+    /// Time scale in ms/s
+    /// </summary>
+    public enum TimeScale: int 
+    {
+        Normal = 1000, Fast = 1800, fastest = 5000, Slow = 400
+    }
+
     public class XNAController : Game
     {
-        public static float TimeScale { get; set; } = 1;
+        public static float TimeScale { get; set; } = 1000;
         public static Point DisplayResolution => new Point(singleton.Graphics.PreferredBackBufferWidth, singleton.Graphics.PreferredBackBufferHeight);
 
         public GraphicsDeviceManager Graphics { get; private set; }
@@ -61,7 +69,7 @@ namespace Andromedroids
         {
             base.Update(gameTime);
 
-            MainController.Update(this, gameTime, (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale);
+            MainController.Update(this, gameTime, (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale * 0.001f);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -71,6 +79,14 @@ namespace Andromedroids
             base.Draw(gameTime);
 
             MainController.Draw(this, Graphics, SpriteBatch, gameTime, deltaTimeScaled: (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale);
+        }
+
+        public void SetSpeed(HashKey key, TimeScale scale)
+        {
+            if (key.Validate("XNAController.SetSpeed"))
+            {
+                TimeScale = (int)scale / 1000.0f;
+            }
         }
     }
 }
