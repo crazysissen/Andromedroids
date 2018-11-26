@@ -199,7 +199,7 @@ namespace Andromedroids
             private Color _startColor, _targetColor;
             private Texture2D _startTexture, _targetTexture;
             private State _startState;
-            private SoundEffect effect, hoverEffect = ContentController.Get<SoundEffect>("Menu Blip Neutral");
+            private SoundEffect effect, hoverEffect = ContentController.Get<SoundEffect>("MenuBlipNeutral");
 
             /// <summary>Testing button</summary>
             public Button(Rectangle transform)

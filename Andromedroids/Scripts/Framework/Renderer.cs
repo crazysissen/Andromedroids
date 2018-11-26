@@ -536,7 +536,7 @@ namespace Andromedroids
     {
         // A square based on the average distances to the screen edges, divided into pieces
         const float
-            UNIVERSALMODIFIER = 0.7f;
+            UNIVERSALMODIFIER = 1.0f;
 
         public const int
             WORLDUNITPIXELS = 64; 

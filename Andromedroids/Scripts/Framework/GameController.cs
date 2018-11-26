@@ -17,7 +17,10 @@ namespace Andromedroids
         const float
             INTROTIME = 5.0f,
             ZOOMOUTTIME = 0.5f,
-            CAMERAOFFSETPROPORTION = 7.0f / 18.0f;
+            CAMERAOFFSETPROPORTION = 7.0f / 18.0f,
+            STARTZOOM = 0.1f,
+            DEFAULTZOOM = 1 / 0.78f,
+            ZOOMMULTIPLIER = 0.7071f;
 
         private XNAController controller;
         private MainController mainController;
@@ -47,6 +50,7 @@ namespace Andromedroids
         {
             this.song = song;
             this.controller = controller;
+            this.players = players;
             r = new Random();
 
             MediaPlayer.Play(song);
@@ -99,7 +103,12 @@ namespace Andromedroids
 
         public void Update(MainController controller, XNAController game, GameTime gameTime, float deltaTimeScaled)
         {
+            Vector2 distance = players[1].Player.Position - players[0].Player.Position;
+            float playerDistance = distance.Length();
+
             Vector2 averagePosition = 0.5f * (players[0].Player.Position + players[1].Player.Position);
+            float targetScale = /*(playerDistance / (distance.X > distance.Y ? distance.X : distance.Y)) * ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance;*/
+                DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER;
 
             Camera camera = RendererController.GetCamera(key);
             camera.Position = averagePosition;
@@ -124,12 +133,13 @@ namespace Andromedroids
                             progress = (startCountdown - INTROTIME) / ZOOMOUTTIME,
                             sine = MathA.SineA(progress);
 
-
+                        camera.Scale = 1 / STARTZOOM.Lerp(targetScale, progress) ;
                     }
 
                     if (startCountdown > INTROTIME + ZOOMOUTTIME)
                     {
-
+                        camera.Scale = 1 / targetScale;
+                        state = 1;
                     }
 
                     break;
@@ -146,7 +156,6 @@ namespace Andromedroids
                             player.FW_Update(key, gameTime, deltaTimeScaled);
                         }
                     }
-
 
                     break;
 

@@ -86,6 +86,8 @@ namespace Andromedroids
 
                 CreateThread();
 
+                Player.SetPosition(key, position);
+
                 Texture2D texture = ContentController.Get<Texture2D>(config.Class.ToString());
                 PlayerTexture = NewTexture(texture, PlayerHullColor, PlayerDecalColor);
 

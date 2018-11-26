@@ -345,12 +345,6 @@
 /processorParam:Quality=Best
 /build:Sound/SFX/MenuBlipStart.wav
 
-#begin Sound/SFX/PickupLong 2.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sound/SFX/PickupLong 2.wav
-
 #begin Sound/SFX/PickupLong.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -440,4 +434,10 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Buttons/Speed3.png
+
+#begin Sound/SFX/PickupLong2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sound/SFX/PickupLong2.wav
 

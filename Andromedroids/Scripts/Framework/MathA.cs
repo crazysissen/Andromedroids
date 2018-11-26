@@ -17,6 +17,9 @@ namespace Andromedroids
         public static float SineD(float value)
             => (float)Math.Sin((value - 1) * Math.PI * 0.5) + 1;
 
+        public static float Lerp(this float min, float max, float value)
+            => min + (max - min) * value;
+
         public static Vector2 Rotate(this Vector2 vector, float radian)
         {
             float sin = (float)Math.Sin(radian);

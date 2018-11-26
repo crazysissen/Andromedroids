@@ -111,11 +111,11 @@ namespace Andromedroids
             quickStart = new GUI.Collection();
 
             GUI.Button quickStartButton = new GUI.Button(new Rectangle(-145 + origin.X, -120 + origin.Y, 290, 80), ContentController.Get<Texture2D>("ButtonQuickstart"));
-            quickStartButton.AddEffect(ContentController.Get<SoundEffect>("Menu Blip Start"));
+            quickStartButton.AddEffect(ContentController.Get<SoundEffect>("MenuBlipStart"));
             quickStartButton.OnClick += Quickstart;
 
             GUI.Button menuButton = new GUI.Button(new Rectangle(-72 + origin.X, 40 + origin.Y, 145, 80), ContentController.Get<Texture2D>("ButtonMenu"));
-            menuButton.AddEffect(ContentController.Get<SoundEffect>("Menu Blip Click"));
+            menuButton.AddEffect(ContentController.Get<SoundEffect>("MenuBlipClick"));
             menuButton.OnClick += Menu;
 
             quickStart.Add(quickStartButton, menuButton);
@@ -156,8 +156,6 @@ namespace Andromedroids
                     break;
 
                 case GameState.InGame:
-
-                    RendererController.GetCamera(key).Scale *= (1 - deltaTimeScaled  * 0.3f);
 
                     if (gameController != null)
                     {
