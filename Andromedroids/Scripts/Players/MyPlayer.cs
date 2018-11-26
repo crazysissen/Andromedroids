@@ -18,18 +18,22 @@ namespace Andromedroids
 
         // Feel free to add your own member variables!
 
+        static int count;
 
         /// <summary>
         /// Requested initially when the game starts. This is where you customize your ship.
         /// </summary>
         public override StartupConfig GetConfig()
         {
+            count++;
+
             return new StartupConfig(ShipClass.Scorpion)
             {
                 Name        = "My Player",              // Ingame display name
                 Description = "Description.",           // Ship description
                 HullColor   = new Color(200, 200, 200),
-                DecalColor  = new Color(0, 0, 50),
+                DecalColor  = count == 1 ? Color.Blue : Color.Red,
+                //= new Color(0, 0, 50),
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
                 {
                     Weapon.StartType.CaliberCannon,

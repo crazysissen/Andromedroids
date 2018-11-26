@@ -9,11 +9,11 @@ namespace Andromedroids
 {
     class ManagedWorldObject
     {
-        private static List<ManagedWorldObject> objects;
+        private static List<ManagedWorldObject> objects = new List<ManagedWorldObject>();
 
         public ManagedWorldObject()
         {
-
+            objects?.Add(this);
         }
 
         public float Rotation { get; private set; }

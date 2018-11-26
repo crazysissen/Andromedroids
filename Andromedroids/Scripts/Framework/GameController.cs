@@ -19,14 +19,14 @@ namespace Andromedroids
             ZOOMOUTTIME = 0.5f,
             CAMERAOFFSETPROPORTION = 7.0f / 18.0f,
             STARTZOOM = 0.1f,
-            DEFAULTZOOM = 1 / 0.78f,
+            DEFAULTZOOM = 1 / 0.85f,
             ZOOMMULTIPLIER = 0.7071f;
 
         private XNAController controller;
         private MainController mainController;
 
         private int frameCount, state;
-        private bool aiRunning;
+        private bool running;
         private float startCountdown;
         private PlayerManager[] players;
         private StatWindow[] statWindows;
@@ -41,7 +41,6 @@ namespace Andromedroids
         {
             if (key.Validate("GameController Constructor"))
             {
-
                 this.key = key;
             }
         }
@@ -90,7 +89,7 @@ namespace Andromedroids
             }
 
             backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
-            aiRunning = true;
+            running = true;
 
             state = 0;
         }
@@ -107,8 +106,8 @@ namespace Andromedroids
             float playerDistance = distance.Length();
 
             Vector2 averagePosition = 0.5f * (players[0].Player.Position + players[1].Player.Position);
-            float targetScale = /*(playerDistance / (distance.X > distance.Y ? distance.X : distance.Y)) * ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance;*/
-                DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER;
+            float targetScale = ((distance.X > distance.Y ? distance.X : distance.Y) / playerDistance) * ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance;
+            //DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER;
 
             Camera camera = RendererController.GetCamera(key);
             camera.Position = averagePosition;
@@ -147,9 +146,11 @@ namespace Andromedroids
                 // Actual ingame loop
                 case 1:
 
-                    if (aiRunning)
+                    if (running)
                     {
                         ++frameCount;
+
+                        
 
                         foreach (PlayerManager player in players)
                         {
