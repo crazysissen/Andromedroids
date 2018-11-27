@@ -59,8 +59,8 @@ namespace Andromedroids
             {
                 foreach (ManagedWorldObject obj in objects)
                 {
-                    obj.Rotation += obj.AngularVelocity;
-                    obj.Position += obj.Velocity;
+                    obj.Rotation += obj.AngularVelocity * scaledDeltaTime;
+                    obj.Position += obj.Velocity * scaledDeltaTime;
                 }
             }
         }

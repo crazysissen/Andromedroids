@@ -33,6 +33,8 @@ namespace Andromedroids
         Renderer.Text name, skippedFrames, skippedFramesPercentage, averageTime, targetRotation;
         Renderer.SpriteScreen[] powerBars, powerups;
 
+        Renderer.Text[] Texts => new Renderer.Text[] { skippedFrames, skippedFramesPercentage, averageTime, targetRotation };
+
         public StatWindow(HashKey key, PlayerManager player, Color color, XNAController controller, Rectangle rectangle)
         {
             if (key.Validate("StatWindow Constructor"))
@@ -66,7 +68,7 @@ namespace Andromedroids
 
                 panel = new Renderer.SpriteScreen(new Layer(MainLayer.GUI, 1), panelSprite, rectangle);
 
-                name = new Renderer.Text(new Layer(MainLayer.GUI, 2), boldFont, player.PlayerName, textSize, 0, TextPosition(0));
+                name = new Renderer.Text(new Layer(MainLayer.GUI, 2), boldFont, player.PlayerName, textSize, 0, Rectangle.Location.ToVector2() + new Vector2(Rectangle.Width * 0.09f, Rectangle.Height * 0.06f));
             }
         }
 
@@ -77,9 +79,16 @@ namespace Andromedroids
 
         private Vector2 TextPosition(int order)
         {
-            Vector2 origin = Rectangle.Location.ToVector2() + new Vector2(Rectangle.Width * 0.08f, Rectangle.Height * 0.5f);
+            Vector2 origin = Rectangle.Location.ToVector2() + new Vector2(Rectangle.Width * 0.09f, Rectangle.Height * 0.5f);
 
             return origin + new Vector2(0, -textSize * 1.1f) * order;
+        }
+
+        private void SetPositions()
+        {
+            name.Position = Rectangle.Location.ToVector2() + new Vector2(Rectangle.Width * 0.09f, Rectangle.Height * 0.06f);
+
+
         }
     }
 }

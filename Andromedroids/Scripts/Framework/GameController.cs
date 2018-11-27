@@ -25,17 +25,19 @@ namespace Andromedroids
         private XNAController controller;
         private MainController mainController;
 
-        private int frameCount, state;
+        private int frameCount, state, timeScale = 1;
         private bool running;
         private float startCountdown;
         private PlayerManager[] players;
         private StatWindow[] statWindows;
         private Renderer.Sprite backgroundSquare;
         private GUI.Collection[] playerStatWindows;
+        private GUI.Button speedControl;
         private Random r;
         private HashKey key;
         private System.Timers.Timer timer;
         private Song song;
+        private Texture2D[] speedControlSprites;
 
         public GameController(HashKey key)
         {
@@ -50,7 +52,10 @@ namespace Andromedroids
             this.song = song;
             this.controller = controller;
             this.players = players;
+            speedControlSprites = ContentController.GetRange<Texture2D>("Speed0", "Speed1", "Speed2", "Speed3");
             r = new Random();
+
+            Point res = XNAController.DisplayResolution;
 
             MediaPlayer.Play(song);
 
@@ -78,7 +83,7 @@ namespace Andromedroids
             }
             while (Vector2.Distance(Vector2.Zero, startPosition) < wuMinDistance);
 
-            Debug.Write(startPosition);
+            Debug.WriteLine(startPosition);
 
             statWindows = new StatWindow[2];
 
@@ -88,10 +93,16 @@ namespace Andromedroids
                 statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
             }
 
+            speedControl = new GUI.Button(new Rectangle(res.X - 130, 20, 110, 14), speedControlSprites[1], GUI.Button.DefaultColors(), GUI.Button.Transition.Switch, 0.05f);
+            speedControl.OnClick += SpeedControlClick;
+            RendererController.GUI += speedControl;
+
             backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
             running = true;
 
             state = 0;
+
+            players[0].FW_Initialize(key);
         }
 
         public void StartGame()
@@ -100,14 +111,19 @@ namespace Andromedroids
             timer = new System.Timers.Timer(500);
         }
 
+        public void EndGame()
+        {
+
+        }
+
         public void Update(MainController controller, XNAController game, GameTime gameTime, float deltaTimeScaled)
         {
             Vector2 distance = players[1].Player.Position - players[0].Player.Position;
             float playerDistance = distance.Length();
 
             Vector2 averagePosition = 0.5f * (players[0].Player.Position + players[1].Player.Position);
-            float targetScale = ((distance.X > distance.Y ? distance.X : distance.Y) / playerDistance) * ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance;
-            //DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER;
+            float targetScale =/* Math.Abs((distance.X > distance.Y ? distance.X : distance.Y) / playerDistance) * ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance;*/
+            1 / (DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER);
 
             Camera camera = RendererController.GetCamera(key);
             camera.Position = averagePosition;
@@ -139,18 +155,22 @@ namespace Andromedroids
                     {
                         camera.Scale = 1 / targetScale;
                         state = 1;
+
+                        players[0].FW_Start(key);
                     }
 
                     break;
 
-                // Actual ingame loop
+                // Ingame loop
                 case 1:
 
                     if (running)
                     {
                         ++frameCount;
 
-                        
+                        camera.Scale = 1 / targetScale;
+
+                        ManagedWorldObject.UpdateAll(key, deltaTimeScaled);
 
                         foreach (PlayerManager player in players)
                         {
@@ -170,7 +190,16 @@ namespace Andromedroids
             }
         }
 
-        void UpdateStatistics(object sender, System.Timers.ElapsedEventArgs e)
+        private void SpeedControlClick()
+        {
+            timeScale = (timeScale + 1) % 4;
+
+            controller.SetSpeed(key, (TimeScale)(timeScale));
+
+            speedControl.Texture = speedControlSprites[timeScale];
+        }
+
+        private void UpdateStatistics(object sender, System.Timers.ElapsedEventArgs e)
         {
             PlayerManager.TimeStats[] times = { players[0].FW_GetElapsedTimes(key, false), players[1].FW_GetElapsedTimes(key, false) };
         }

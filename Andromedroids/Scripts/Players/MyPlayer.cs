@@ -47,8 +47,8 @@ namespace Andromedroids
         }
 
         /// <summary>
-        /// Where you write your initialization logic. Runs only once at the start of the game/round.
-        /// You get to take as much time as you want here up to a maximum of five seconds, where the player is disqualified.
+        /// Where you write your initialization logic. Called only once at the start of the game/round.
+        /// Your AI gets a maximum of five seconds, and is disqualified of this is exceeded.
         /// </summary>
         public override void Initialize()
         {
@@ -56,7 +56,7 @@ namespace Andromedroids
         }
 
         /// <summary>
-        /// Updated once per frame, this is where you write the real-time logic for your ship. 
+        /// Called once per frame, this is where you write the real-time logic for your ship. 
         /// Keep in mind that slow code is disregarded; if you take too long you will skip frames, a major disadvantage.
         /// </summary>
         public override Configuration Update()
@@ -72,7 +72,7 @@ namespace Andromedroids
         }
 
         /// <summary>
-        /// Activated when a new weapon is picked up, and requests the weapon slot to be filled/replaced.
+        /// Called when a new weapon is picked up, and requests the weapon slot to be filled/replaced.
         /// </summary>
         public override int ReplaceWeapon(Weapon.Type weaponType)
         {
@@ -80,7 +80,7 @@ namespace Andromedroids
         }
 
         /// <summary>
-        /// Activated when a powerup is collected.
+        /// Called when a powerup is collected.
         /// </summary>
         public override void PowerupActivation(Powerup powerupType)
         {

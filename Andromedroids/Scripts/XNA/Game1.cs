@@ -9,14 +9,14 @@ namespace Andromedroids
     /// </summary>
     public enum TimeScale: int 
     {
-        Normal = 1000, Fast = 1800, fastest = 5000, Slow = 400
+        Normal, Fast, Fastest, Slow
     }
 
     public class XNAController : Game
     {
-        public static float TimeScale { get; set; } = 1000;
         public static Point DisplayResolution => new Point(singleton.Graphics.PreferredBackBufferWidth, singleton.Graphics.PreferredBackBufferHeight);
 
+        public float TimeScale { get; private set; } = 1000;
         public GraphicsDeviceManager Graphics { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public MainController MainController { get; private set; }
@@ -85,7 +85,9 @@ namespace Andromedroids
         {
             if (key.Validate("XNAController.SetSpeed"))
             {
-                TimeScale = (int)scale / 1000.0f;
+                float[] speeds = { 0.4f, 1.0f, 1.8f, 5.0f };
+
+                TimeScale = speeds[(int)scale];
             }
         }
     }

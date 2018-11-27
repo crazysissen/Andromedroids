@@ -24,7 +24,7 @@ namespace Andromedroids
 
         public void SetGameState(GameState gameState, int subState)
         {
-            Debug.Write("GameState set to: " + gameState.ToString());
+            Debug.WriteLine("GameState set to: " + gameState.ToString());
 
             GameState = gameState;
             Replace(subState);
@@ -32,7 +32,7 @@ namespace Andromedroids
 
         public void StackSubState(int state)
         {
-            Debug.Write("SubState set to: " + state);
+            Debug.WriteLine("SubState set to: " + state);
 
             SubStateStack.Push(state);
         }

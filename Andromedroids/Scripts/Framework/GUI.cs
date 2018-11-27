@@ -454,10 +454,10 @@ namespace Andromedroids
 
             public void AddEffect(SoundEffect effect) => this.effect = effect;
 
-            private static Color[] DefaultColors()
+            public static Color[] DefaultColors()
                 => new Color[] { new Color(0.9f, 0.9f, 0.9f), Color.White, new Color(0.75f, 0.75f, 0.75f) };
 
-            private static Color[] PseudoDefaultColors(Color origin)
+            public static Color[] PseudoDefaultColors(Color origin)
                 => new Color[] { origin, origin * 1.15f, origin * 0.85f };
 
             public void SetPseudoDefaultColors(Color origin)

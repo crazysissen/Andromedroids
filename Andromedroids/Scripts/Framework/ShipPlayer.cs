@@ -32,6 +32,12 @@ namespace Andromedroids
         public int TotalPower { get; set; }
         public int UnusedPower { get; set; }
 
+        public bool[] WeaponPower { get; set; }
+        public bool[] WeaponPowerNeeded { get; set; }
+        public bool[] WeaponReady { get; set; }
+
+        public Powerup[] ActivePowerups { get; set; }
+
         public abstract StartupConfig GetConfig();
         public abstract void Initialize();
         public abstract Configuration Update();
@@ -51,7 +57,7 @@ namespace Andromedroids
 
         private ManualResetEvent frameStart = new ManualResetEvent(false);
         private XNAController controller;
-        private Thread playerThread;
+        private Thread playerThread, startThread;
         private Renderer.Sprite renderer;
         private HashKey key;
         private double currentTimePeriod, totalTime;
@@ -92,14 +98,42 @@ namespace Andromedroids
                 PlayerTexture = NewTexture(texture, PlayerHullColor, PlayerDecalColor);
 
                 renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+
+                Debug.WriteLine(PlayerName + ": SETUP");
+            }
+        }
+
+        public virtual void FW_Initialize(HashKey key)
+        {
+            if (key.Validate("ShipPlayer.Initialize"))
+            {
+                Debug.WriteLine(PlayerName + ": INITIALIZE");
+
+                startThread = new Thread(Player.Initialize)
+                {
+                    Name = PlayerName + "[START THREAD]"
+                };
+                startThread.Start();
             }
         }
 
         public virtual int FW_Start(HashKey key)
         {
-            playerThread = new Thread(RunUpdate);
+            if (key.Validate("ShipPlayer.Start"))
+            {
+                Debug.WriteLine(PlayerName + ": START");
 
-            return playerThread.ManagedThreadId;
+                CreateThread();
+                playerThread.Start();
+
+                run = true;
+
+                Player.SetVelocity(key, Vector2.One);
+
+                return playerThread.ManagedThreadId;
+            }
+
+            return 0;
         }
 
         /// <summary>
@@ -254,7 +288,8 @@ namespace Andromedroids
 
     public struct Configuration
     {
-        public float targetRotation, thrusterPower, steeringPower, shieldPower;
+        public float targetRotation, thrusterPower, rotationPower, shieldPower;
         public float[] weaponPower;
+        public float[] weaponFire;
     }
 }
