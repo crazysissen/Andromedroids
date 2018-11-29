@@ -33,7 +33,7 @@ namespace Andromedroids
         {
             if (key.Validate("ManagedWorldObject.SetVelocity"))
             {
-                Position = velocity;
+                Velocity = velocity;
             }
         }
 

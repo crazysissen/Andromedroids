@@ -24,6 +24,8 @@ namespace Andromedroids
         }
     }
 
+    /// <summary>Contains the player itself, and a bunch of information to be used in an AI.
+    /// Remmber that changing these will bear no effect.</summary>
     abstract class ShipPlayer : ManagedWorldObject
     {
         public PlayerManager Manager { get; private set; }
@@ -32,10 +34,18 @@ namespace Andromedroids
         public int TotalPower { get; set; }
         public int UnusedPower { get; set; }
 
-        public bool[] WeaponPower { get; set; }
-        public bool[] WeaponPowerNeeded { get; set; }
+        /// <summary>The time needed between shots for given weapon</summary>
+        public float[] WeaponCooldown { get; set; }
+        /// <summary>Remaining cooldown for given weapon</summary>
+        public float[] WeaponCooldownRemaining { get; set; }
+        /// <summary>Current power in the weapon</summary>
+        public float[] WeaponPower { get; set; }
+        /// <summary>How much power the weapon needs to work at full efficiency</summary>
+        public float[] WeaponPowerNeeded { get; set; }
+        /// <summary>If the weapon is ready to fire</summary>
         public bool[] WeaponReady { get; set; }
 
+        /// <summary>Currently active powerups</summary>
         public Powerup[] ActivePowerups { get; set; }
 
         public abstract StartupConfig GetConfig();
@@ -92,6 +102,7 @@ namespace Andromedroids
 
                 CreateThread();
 
+                Player.SetRotation(key, rotation);
                 Player.SetPosition(key, position);
 
                 Texture2D texture = ContentController.Get<Texture2D>(config.Class.ToString());
@@ -143,6 +154,9 @@ namespace Andromedroids
         {
             if (key.Validate("ShipPlayer.Update"))
             {
+                renderer.Position = Player.Position;
+                renderer.Rotation = Player.Rotation;
+
                 frameStart.Set();
                 Thread.Sleep(2);
                 frameStart.Reset();

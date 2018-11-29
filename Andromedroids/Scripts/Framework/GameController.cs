@@ -29,15 +29,17 @@ namespace Andromedroids
         private bool running;
         private float startCountdown;
         private PlayerManager[] players;
-        private StatWindow[] statWindows;
-        private Renderer.Sprite backgroundSquare;
-        private GUI.Collection[] playerStatWindows;
-        private GUI.Button speedControl;
         private Random r;
         private HashKey key;
         private System.Timers.Timer timer;
-        private Song song;
         private Texture2D[] speedControlSprites;
+        private Song song;
+
+        private StatWindow[] statWindows;
+        private GUI.Collection[] playerStatWindows;
+        private GUI.Button speedControl;
+        private Renderer.Sprite backgroundSquare;
+        private Renderer.SpriteScreen background;
 
         public GameController(HashKey key)
         {
@@ -47,32 +49,24 @@ namespace Andromedroids
             }
         }
 
-        public void Initialize(XNAController controller, Song song, PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance)
+        public void Initialize(XNAController controller, Renderer.SpriteScreen backgroundRenderer, Song song, Texture2D background, PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance)
         {
             this.song = song;
             this.controller = controller;
             this.players = players;
+            this.background = backgroundRenderer;
             speedControlSprites = ContentController.GetRange<Texture2D>("Speed0", "Speed1", "Speed2", "Speed3");
             r = new Random();
 
             Point res = XNAController.DisplayResolution;
 
+            // Play song
             MediaPlayer.Play(song);
 
-            //Texture2D square = ContentController.Get<Texture2D>("Square");
+            // Set the background
+            backgroundRenderer.Texture = background;
 
-            //for (float x = -wuRadius + 0.5f; x < wuRadius; ++x)
-            //{
-            //    for (float y = -wuRadius + 0.5f; y < wuRadius; ++y)
-            //    {
-            //        float aX = x + wuRadius, aY = y + wuRadius;
-
-            //        if (((int)aX % 2 == 0 && (int)aY % 2 == 0) || ((int)aX % 2 == 1 && (int)aY % 2 == 1))
-            //        {
-            //            tiles.Add(new Renderer.Sprite(new Layer(MainLayer.Background, 0), square, new Vector2(x, y), Vector2.One * Camera.WORLDUNITPIXELS, new Color(0, 0, 15, 255), 0));
-            //        }
-            //    }
-            //}
+            // Setup suitable start position/rotation
 
             float startRotation = (float)r.NextDouble() * (float)Math.PI * 2;
             Vector2 startPosition;
@@ -85,18 +79,24 @@ namespace Andromedroids
 
             Debug.WriteLine(startPosition);
 
+            // Setup the stat windows visible in-game
             statWindows = new StatWindow[2];
 
             for (int i = 0; i < players.Length; ++i)
             {
+                // Perform initial setup of AIs
                 players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+
+                // Initialize stat windows
                 statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
             }
 
+            // Setup the speed control switch
             speedControl = new GUI.Button(new Rectangle(res.X - 130, 20, 110, 14), speedControlSprites[1], GUI.Button.DefaultColors(), GUI.Button.Transition.Switch, 0.05f);
             speedControl.OnClick += SpeedControlClick;
             RendererController.GUI += speedControl;
 
+            // Setup the out-of-bounds box
             backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
             running = true;
 
@@ -122,8 +122,10 @@ namespace Andromedroids
             float playerDistance = distance.Length();
 
             Vector2 averagePosition = 0.5f * (players[0].Player.Position + players[1].Player.Position);
-            float targetScale =/* Math.Abs((distance.X > distance.Y ? distance.X : distance.Y) / playerDistance) * ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance;*/
-            1 / (DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER);
+            float absX = Math.Abs(distance.X), absY = Math.Abs(distance.Y);
+
+            float targetScale = 1 / (/*Math.Abs((absX > absY ? absX : absY) / playerDistance) * */ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance);
+            //(DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER);
 
             Camera camera = RendererController.GetCamera(key);
             camera.Position = averagePosition;
@@ -148,12 +150,12 @@ namespace Andromedroids
                             progress = (startCountdown - INTROTIME) / ZOOMOUTTIME,
                             sine = MathA.SineA(progress);
 
-                        camera.Scale = 1 / STARTZOOM.Lerp(targetScale, progress) ;
+                        camera.Scale = STARTZOOM.Lerp(targetScale, progress) ;
                     }
 
                     if (startCountdown > INTROTIME + ZOOMOUTTIME)
                     {
-                        camera.Scale = 1 / targetScale;
+                        camera.Scale = targetScale;
                         state = 1;
 
                         players[0].FW_Start(key);
@@ -168,7 +170,7 @@ namespace Andromedroids
                     {
                         ++frameCount;
 
-                        camera.Scale = 1 / targetScale;
+                        camera.Scale = targetScale;
 
                         ManagedWorldObject.UpdateAll(key, deltaTimeScaled);
 

@@ -259,7 +259,7 @@ namespace Andromedroids
             }
 
             gameController = new GameController(key);
-            gameController.Initialize(controller, ingameMusic, players, wuRadius, wuMinDistance, wuMaxDistance);
+            gameController.Initialize(controller, menuBackground, ingameMusic, ContentController.Get<Texture2D>("Space1"), players, wuRadius, wuMinDistance, wuMaxDistance);
         }
 
         private void Quickstart()
