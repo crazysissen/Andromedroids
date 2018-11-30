@@ -10,9 +10,10 @@ using Microsoft.Xna.Framework.Input;
 namespace Andromedroids
 {
     // Don't remove this attribute, it's how the game will find your AI!
-    // The string entered will be the menu display name, which is cropped to a maximum of 16 characters.
+    // The first string entered will be the menu display name, which is cropped to a maximum of 16 characters.
+    // The first string entered will be the short name abbreviation, which is cropped to a maximum of 5 characters.
     // The bool entered will determine if it is to be eglible for a quickstart, there must be exactly two AIs labled this way for it to work.
-    [ShipAI("My Player", true)]
+    [ShipAI("My Player", "PLAYR", true)]
     class MyPlayer : ShipPlayer
     {
 
@@ -29,7 +30,7 @@ namespace Andromedroids
 
             return new StartupConfig(ShipClass.Scorpion)
             {
-                Name        = "My Player",              // Ingame display name
+                Name        = "My Player",              // Full ingame display name
                 Description = "Description.",           // Ship description
                 HullColor   = new Color(0xAFAFAF),
                 DecalColor  = count == 1 ? Color.Blue : Color.Red,

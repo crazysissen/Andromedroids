@@ -15,12 +15,13 @@ namespace Andromedroids
     sealed class ShipAI : Attribute
     {
         public string MenuName { get; private set; }
-        public string 
+        public string ShortName { get; private set; }
         public bool Quickstart { get; private set; }
 
-        public ShipAI(string menuName, bool quickstart = false)
+        public ShipAI(string menuName, string shortName, bool quickstart = false)
         {
             MenuName = menuName;
+            ShortName = shortName;
             Quickstart = quickstart;
         }
     }
@@ -56,7 +57,7 @@ namespace Andromedroids
         public abstract void PowerupActivation(Powerup powerupType);
     }
 
-    class PlayerManager
+    sealed class PlayerManager
     {
         public ShipPlayer Player { get; private set; }
 
@@ -115,7 +116,7 @@ namespace Andromedroids
             }
         }
 
-        public virtual void FW_Initialize(HashKey key)
+        public void FW_Initialize(HashKey key)
         {
             if (key.Validate("ShipPlayer.Initialize"))
             {
@@ -129,7 +130,7 @@ namespace Andromedroids
             }
         }
 
-        public virtual int FW_Start(HashKey key)
+        public int FW_Start(HashKey key)
         {
             if (key.Validate("ShipPlayer.Start"))
             {
