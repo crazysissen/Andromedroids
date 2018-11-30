@@ -31,7 +31,7 @@ namespace Andromedroids
             {
                 Name        = "My Player",              // Ingame display name
                 Description = "Description.",           // Ship description
-                HullColor   = new Color(200, 200, 200),
+                HullColor   = new Color(0xAFAFAF),
                 DecalColor  = count == 1 ? Color.Blue : Color.Red,
                 //= new Color(0, 0, 50),
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
@@ -48,16 +48,17 @@ namespace Andromedroids
 
         /// <summary>
         /// Where you write your initialization logic. Called only once at the start of the game/round.
-        /// Your AI gets a maximum of five seconds, and is disqualified of this is exceeded.
+        /// Your AI gets a maximum of five seconds, and is disqualified if this is exceeded.
         /// </summary>
         public override void Initialize()
         {
-
+            
         }
 
         /// <summary>
         /// Called once per frame, this is where you write the real-time logic for your ship. 
-        /// Keep in mind that slow code is disregarded; if you take too long you will skip frames, a major disadvantage.
+        /// All the input is sent through the return value Configuration, which in turn will affect your ship
+        /// Keep in mind that slow code is disregarded; if you take too long you will skip frames, a potential disadvantage.
         /// </summary>
         public override Configuration Update()
         {
@@ -65,7 +66,21 @@ namespace Andromedroids
 
             Configuration config = new Configuration()
             {
+                thrusterPower = 0.0f,
+                shieldPower = 0.0f,
+                rotationPower = 0.0f,
 
+                targetRotation = 0.0f,
+
+                weaponPower = new float[]
+                {
+                    0, 0, 0, 0, 0, 0
+                },
+
+                weaponFire = new bool[]
+                {
+                    false, false, false, false, false, false
+                }
             };
 
             return config;
@@ -76,6 +91,8 @@ namespace Andromedroids
         /// </summary>
         public override int ReplaceWeapon(Weapon.Type weaponType)
         {
+
+
             return 0;
         }
 
@@ -84,7 +101,7 @@ namespace Andromedroids
         /// </summary>
         public override void PowerupActivation(Powerup powerupType)
         {
-
+            
         }
     }
 }

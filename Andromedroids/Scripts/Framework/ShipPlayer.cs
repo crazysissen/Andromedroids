@@ -15,6 +15,7 @@ namespace Andromedroids
     sealed class ShipAI : Attribute
     {
         public string MenuName { get; private set; }
+        public string 
         public bool Quickstart { get; private set; }
 
         public ShipAI(string menuName, bool quickstart = false)
@@ -304,6 +305,6 @@ namespace Andromedroids
     {
         public float targetRotation, thrusterPower, rotationPower, shieldPower;
         public float[] weaponPower;
-        public float[] weaponFire;
+        public bool[] weaponFire;
     }
 }

@@ -16,7 +16,7 @@ namespace Andromedroids
     {
         public static Point DisplayResolution => new Point(singleton.Graphics.PreferredBackBufferWidth, singleton.Graphics.PreferredBackBufferHeight);
 
-        public float TimeScale { get; private set; } = 1000;
+        public float TimeScale { get; private set; } = 1;
         public GraphicsDeviceManager Graphics { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public MainController MainController { get; private set; }
@@ -69,7 +69,7 @@ namespace Andromedroids
         {
             base.Update(gameTime);
 
-            MainController.Update(this, gameTime, (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale * 0.001f);
+            MainController.Update(this, gameTime, (float)gameTime.ElapsedGameTime.TotalSeconds * TimeScale);
         }
 
         protected override void Draw(GameTime gameTime)
