@@ -15,13 +15,11 @@ namespace Andromedroids
     sealed class ShipAI : Attribute
     {
         public string MenuName { get; private set; }
-        public string ShortName { get; private set; }
         public bool Quickstart { get; private set; }
 
-        public ShipAI(string menuName, string shortName, bool quickstart = false)
+        public ShipAI(string menuName, bool quickstart = false)
         {
             MenuName = menuName;
-            ShortName = shortName;
             Quickstart = quickstart;
         }
     }
@@ -52,7 +50,7 @@ namespace Andromedroids
 
         public abstract StartupConfig GetConfig();
         public abstract void Initialize();
-        public abstract Configuration Update();
+        public abstract Configuration Update(float deltaTime);
         public abstract int ReplaceWeapon(Weapon.Type weaponType);
         public abstract void PowerupActivation(Powerup powerupType);
     }
@@ -62,6 +60,7 @@ namespace Andromedroids
         public ShipPlayer Player { get; private set; }
 
         public string PlayerName { get; private set; }
+        public string ShortName { get; private set; }
         public string PlayerDescription { get; private set; }
         public Color PlayerHullColor { get; private set; }
         public Color PlayerDecalColor { get; private set; }
@@ -97,7 +96,8 @@ namespace Andromedroids
                 StartupConfig config = Player.GetConfig();
                 Weapon.StartType[] weaponTypes = config.Weapons;
 
-                PlayerName = config.Name;
+                PlayerName = config.Name.Length <= 16 ? config.Name : config.Name.Substring(0, 16);
+                ShortName = config.ShortName.Length <= 5 ? config.ShortName : config.ShortName.Substring(0, 5);
                 PlayerDescription = config.Description;
                 PlayerHullColor = config.HullColor;
                 PlayerDecalColor = config.DecalColor;
@@ -216,18 +216,36 @@ namespace Andromedroids
 
         private void RunUpdate()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch 
+                speedTimer = new Stopwatch(),
+                deltaTimeTimer = null;
 
             while (run)
             {
-                frameStart.WaitOne(3);
+                frameStart.WaitOne(1);
 
-                Player.Update();
+                speedTimer.Restart();
+
+                Player.Update(GetTime(deltaTimeTimer));
 
                 ++currentFrameCount;
-                double elapsed = stopwatch.Elapsed.TotalMilliseconds;
+
+                double elapsed = speedTimer.Elapsed.TotalMilliseconds;
             }
 
+        }
+
+        private static float GetTime(Stopwatch stopwatch)
+        {
+            if (stopwatch != null)
+            {
+                float time = (float)stopwatch.Elapsed.TotalSeconds;
+                stopwatch.Restart();
+                return time;
+            }
+
+            stopwatch = Stopwatch.StartNew();
+            return 0.0f;
         }
 
         private void CreateThread()
@@ -304,8 +322,8 @@ namespace Andromedroids
 
     public struct Configuration
     {
-        public float targetRotation, thrusterPower, rotationPower, shieldPower;
-        public float[] weaponPower;
+        public int targetRotation, thrusterPower, rotationPower, shieldPower;
+        public int[] weaponPower;
         public bool[] weaponFire;
     }
 }

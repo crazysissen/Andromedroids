@@ -242,7 +242,7 @@ namespace Andromedroids
 
         void Setup(XNAController systemController, MenuPlayer[] menuPlayers)
         {
-            PlayerManager[] players = new PlayerManager[2] 
+            PlayerManager[] players = new PlayerManager[2]
             {
                 new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType)),
                 new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType))

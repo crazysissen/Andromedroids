@@ -35,11 +35,18 @@ namespace Andromedroids
         private Texture2D[] speedControlSprites;
         private Song song;
 
-        private StatWindow[] statWindows;
-        private GUI.Collection[] playerStatWindows;
         private GUI.Button speedControl;
+
         private Renderer.Sprite backgroundSquare;
         private Renderer.SpriteScreen background;
+
+        // Stat windows
+        private GUI.Collection[] playerStatWindows;
+        private StatWindow[] statWindows;
+ 
+        // Small names
+        private Renderer.SpriteScreen[] nameConnectors;
+        private Renderer.Text[] nameTexts;
 
         public GameController(HashKey key)
         {
@@ -98,11 +105,27 @@ namespace Andromedroids
 
             // Setup the out-of-bounds box
             backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
-            running = true;
 
+            running = true;
             state = 0;
 
-            players[0].FW_Initialize(key);
+            // Initialize the players
+            for (int i = 0; i < players.Length; i++)
+            {
+                players[i].FW_Initialize(key);
+
+            }
+
+            // Set up the text connectors
+            nameTexts = new Renderer.Text[players.Length];
+            nameConnectors = new Renderer.SpriteScreen[players.Length];
+            for (int i = 0; i < players.Length; ++i)
+            {
+                nameConnectors[i] = new Renderer.SpriteScreen(new Layer(MainLayer.GUI, 0), ContentController.Get<Texture2D>("Square"), new Rectangle());
+                nameTexts[i] = new Renderer.Text(new Layer(MainLayer.GUI, 0), ContentController.Get<SpriteFont>("Thin"), players[i].ShortName, 20, 0, Vector2.Zero);
+            }
+
+            DrawAbbreviations(RendererController.Camera);
         }
 
         public void StartGame()
@@ -137,6 +160,8 @@ namespace Andromedroids
 
                     startCountdown += deltaTimeScaled;
 
+                    DrawAbbreviations(RendererController.Camera);
+
                     if (startCountdown < INTROTIME)
                     {
                         float progress = startCountdown / INTROTIME;
@@ -170,6 +195,8 @@ namespace Andromedroids
                     {
                         ++frameCount;
 
+                        DrawAbbreviations(RendererController.Camera);
+
                         camera.Scale = targetScale;
 
                         ManagedWorldObject.UpdateAll(key, deltaTimeScaled);
@@ -189,6 +216,17 @@ namespace Andromedroids
                 // Disqualification
                 case 3:
                     break;
+            }
+        }
+
+        private void DrawAbbreviations(Camera camera)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                Vector2 sPosition = camera.WorldToScreenPosition(players[i].Player.Position);
+
+                nameConnectors[i].Transform = new Rectangle((int)sPosition.X, (int)sPosition.Y - 85, 2, 50);
+                nameTexts[i].Position = new Vector2((int)sPosition.X + 5, (int)sPosition.Y - 85);
             }
         }
 

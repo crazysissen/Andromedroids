@@ -17,20 +17,11 @@ namespace Andromedroids
             WEAPONCOUNT = 6;
 
         public string Name { get; set; }
+        public string ShortName { get; set; }
         public string Description { get; set; }
+        public ShipClass Class { get; set; }
         public Color HullColor { get; set; }
         public Color DecalColor { get; set; }
-        public ShipClass Class { get; set; }
         public Weapon.StartType[] Weapons { get; set; }
-
-        public StartupConfig(ShipClass shipClass)
-        {
-            Name = "";
-            Description = "";
-            HullColor = Color.White;
-            DecalColor = Color.White;
-            Class = shipClass;
-            Weapons = new Weapon.StartType[WEAPONCOUNT];
-        }
     }
 }
