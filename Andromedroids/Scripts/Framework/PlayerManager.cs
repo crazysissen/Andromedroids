@@ -33,6 +33,7 @@ namespace Andromedroids
         private PlayerManager opponent;
         private ManualResetEvent frameStart = new ManualResetEvent(false);
         private XNAController controller;
+        private GameController gameController;
         private Thread playerThread, startThread;
         private Renderer.Sprite renderer;
         private HashKey key;
@@ -58,11 +59,12 @@ namespace Andromedroids
         /// <summary>
         /// FRAMEWORK. NOT to be used in the AI. Will register as a cheat.
         /// </summary>
-        public void FW_Setup(HashKey key, PlayerManager opponentManager, Vector2 position, float rotation)
+        public void FW_Setup(HashKey key, GameController gameController, PlayerManager opponentManager, Vector2 position, float rotation)
         {
             if (key.Validate("ShipPlayer.Setup"))
             {
                 opponent = opponentManager;
+                this.gameController = gameController;
 
                 StartupConfig config = Player.GetConfig();
                 Weapon.StartType[] weaponTypes = config.Weapons;
@@ -84,7 +86,7 @@ namespace Andromedroids
                 weapons = new Weapon[6];
                 for (int i = 0; i < 6; i++)
                 {
-                    weapons[i] = new Weapon(key, (Weapon.Type)weaponTypes[i], position, i, rotation, PlayerNumber);
+                    weapons[i] = new Weapon(key, (Weapon.Type)weaponTypes[i], position, i, rotation, PlayerNumber, gameController);
                 }
 
                 remainingPowerupTime = new float[4];
@@ -97,7 +99,7 @@ namespace Andromedroids
 
         public void FW_Initialize(HashKey key)
         {
-            if (key.Validate("ShipPlayer.Initialize"))
+            if (key.Validate("ShipPlayer.Initialize [Player:" + ShortName + "]"))
             {
                 Debug.WriteLine(PlayerName + ": INITIALIZE");
 
@@ -111,7 +113,7 @@ namespace Andromedroids
 
         public int FW_Start(HashKey key)
         {
-            if (key.Validate("ShipPlayer.Start"))
+            if (key.Validate("ShipPlayer.Start [Player:" + ShortName + "]"))
             {
                 Debug.WriteLine(PlayerName + ": START");
 
@@ -131,7 +133,7 @@ namespace Andromedroids
         /// </summary>
         public void FW_Update(HashKey key, GameTime gameTime, float scaledDeltaTime, List<Bullet>[] allBullets)
         {
-            if (key.Validate("ShipPlayer.Update"))
+            if (key.Validate("ShipPlayer.Update [Player:" + ShortName + "]"))
             {
                 List<PowerupInfo> powerupInfo = new List<PowerupInfo>();
                 for (int i = 0; i < remainingPowerupTime.Length; i++)
@@ -222,7 +224,7 @@ namespace Andromedroids
         /// </summary>
         public void FW_Draw(HashKey key)
         {
-            if (key.Validate("ShipPlayer.Draw"))
+            if (key.Validate("ShipPlayer.Draw [Player:" + ShortName + "]"))
             {
                 
             }
@@ -233,7 +235,7 @@ namespace Andromedroids
         /// </summary>
         public TimeStats FW_GetElapsedTimes(HashKey key, bool total)
         {
-            if (key.Validate("ShipPlayer.Draw"))
+            if (key.Validate("ShipPlayer.GetElapsedTimes [Player:" + ShortName + "]"))
             {
                 TimeStats returnValue;
 
@@ -264,6 +266,12 @@ namespace Andromedroids
             }
 
             return new TimeStats();
+        }
+
+        public void Damage(HashKey key, int damage)
+        {
+            if (key.Validate("PlayerManager.Damage [Player:" + ShortName + "]"))
+            Health -= damage;
         }
 
         private void RunUpdate()

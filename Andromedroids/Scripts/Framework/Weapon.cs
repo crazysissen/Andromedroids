@@ -25,15 +25,21 @@ namespace Andromedroids
         public Type WeaponType { get; }
         public int PowerNeeded { get; private set; }
         public int PowerMaximum { get; private set; } //TODO
+        public float Velocity { get; private set; }
+        public float Cooldown { get; private set; }
 
+        private GameController controller;
         private Renderer.Sprite renderer;
+        private HashKey key;
         private int team;
 
-        public Weapon(HashKey key, Type type, Vector2 shipPosition, int slot, float rotation, int team)
+        public Weapon(HashKey key, Type type, Vector2 shipPosition, int slot, float rotation, int team, GameController controller)
         {
             if (key.Validate("Weapon Constructor"))
             {
                 this.team = team;
+                this.key = key;
+                this.controller = controller;
 
                 WeaponType = type;
 
@@ -42,14 +48,17 @@ namespace Andromedroids
                     case Type.GatlingGun:
                         PowerNeeded = 2;
                         PowerMaximum = 5;
+                        Velocity = 2.0f;
                         break;
                     case Type.RocketLauncher:
                         PowerNeeded = 4;
                         PowerMaximum = 6;
+                        Velocity = 1.5f;
                         break;
                     case Type.CaliberCannon:
                         PowerNeeded = 3;
                         PowerMaximum = 6;
+                        Velocity = 1f;
                         break;
                 }
 
@@ -70,12 +79,26 @@ namespace Andromedroids
             }
         }
 
-        public void TryFire(int power)
+        public void Update(float deltaTime)
         {
-            if (power >= PowerNeeded)
+            Cooldown = Cooldown > deltaTime ? Cooldown - deltaTime : 0;
+        }
+
+        public void TryFire(Vector2 origin, int power, int slot, float currentRotation)
+        {
+            if (power >= PowerNeeded && Cooldown <= 0)
             {
-                
+                LaunchBullet(origin, slot, currentRotation);
             }
+        }
+
+        public void LaunchBullet(Vector2 origin, int slot, float currentRotation)
+        {
+            float rotation = ForwardRotation(currentRotation, slot);
+            Bullet bullet = new Bullet(key, (Bullet.BulletType)WeaponType, origin, (new Vector2(0, -1)).Rotate(rotation), rotation, controller);
+
+
+            controller.AddBullet(bullet, team);
         }
 
         public void SetPosition(Vector2 shipPosition, int slot, float rotation)
@@ -89,7 +112,10 @@ namespace Andromedroids
 
             Vector2 targetPosition = (weaponOffsets[slot].ToVector2() / Camera.WORLDUNITPIXELS * 2).Rotate(rotation);
             renderer.Position = shipPosition + targetPosition;
-            renderer.Rotation = rotation + ((float)Math.PI * 0.5f) * (slot > 2 ? 3 : 1);
+            renderer.Rotation = ForwardRotation(rotation, slot);
         }
+
+        public float ForwardRotation(float rotation, int slot) 
+            => rotation + ((float)Math.PI * 0.5f) * (slot > 2 ? 3 : 1);
     }
 }

@@ -32,17 +32,19 @@ namespace Andromedroids
         public BulletType Type { get; set; }
 
         private Renderer.Sprite renderer;
+        private GameController controller;
         private HashKey key;
         //private float remainingTime;
 
-        public Bullet(HashKey key, BulletType type, Vector2 position, Vector2 Velocity, float rotation)
+        public Bullet(HashKey key, BulletType type, Vector2 position, Vector2 velocity, float rotation, GameController controller)
         {
             if (key.Validate("Bullet Constructor"))
             {
                 this.key = key;
+                this.controller = controller;
 
                 Position = position;
-                Velocity = Velocity;
+                Velocity = velocity;
                 Rotation = rotation;
 
                 if (speck == null)
@@ -88,7 +90,8 @@ namespace Andromedroids
         {
             if (Vector2.Distance(targetPlayer.Player.Position, Position) < ShipPlayer.HITRADIUS + BlastRadius)
             {
-
+                targetPlayer.Damage(key, Damage);
+                controller.RemoveBullet(this, (targetPlayer.PlayerNumber + 1) % 2);
             }
         }
 

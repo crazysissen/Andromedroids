@@ -95,7 +95,7 @@ namespace Andromedroids
             for (int i = 0; i < players.Length; ++i)
             {
                 // Perform initial setup of AIs
-                players[i].FW_Setup(key, players[(i + 1) % 2], i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+                players[i].FW_Setup(key, this, players[(i + 1) % 2], i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
 
                 // Initialize stat windows
                 statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
@@ -213,6 +213,14 @@ namespace Andromedroids
 
                         ManagedWorldObject.UpdateAll(key, deltaTimeScaled);
 
+                        for (int i = 0; i < 2; i++)
+                        {
+                            foreach (Bullet bullet in bullets[i])
+                            {
+                                bullet.Update(deltaTimeScaled, players[(i + 1) % 2]);
+                            }
+                        }
+
                         foreach (PlayerManager player in players)
                         {
                             player.FW_Update(key, gameTime, deltaTimeScaled, bullets);
@@ -231,9 +239,14 @@ namespace Andromedroids
             }
         }
 
-        public void AddBullet(HashKey key, Bullet bullet, int team)
+        public void AddBullet(Bullet bullet, int team)
         {
+            bullets[team].Add(bullet);
+        }
 
+        public void RemoveBullet(Bullet bullet, int team)
+        {
+            bullets[team].Remove(bullet);
         }
 
         private void DrawAbbreviations(Camera camera)
