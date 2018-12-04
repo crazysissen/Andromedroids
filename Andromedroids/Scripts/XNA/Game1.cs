@@ -85,7 +85,7 @@ namespace Andromedroids
         {
             if (key.Validate("XNAController.SetSpeed"))
             {
-                float[] speeds = { 0.4f, 1.0f, 1.8f, 5.0f };
+                float[] speeds = { 0.4f, 1.0f, 4.5f, 12.0f };
 
                 TimeScale = speeds[(int)scale];
             }

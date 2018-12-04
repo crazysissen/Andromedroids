@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 namespace Andromedroids
 {
     // Don't remove this attribute, it's how the game will find your AI!
-    // The first string entered will be the menu display name, which is cropped to a maximum of 16 characters.
+    // The string entered will be the menu display name, which is cropped to a maximum of 16 characters.
     // The bool entered will determine if it is to be eglible for a quickstart, there must be exactly two AIs labled this way for it to work.
     [ShipAI("My Player", true)]
     class MyPlayer : ShipPlayer
@@ -29,9 +29,9 @@ namespace Andromedroids
 
             return new StartupConfig()
             {
-                Name        = "My Player",              // Full ingame display name, 15 letters max
-                ShortName   = "PLAYR",                  // Short display name, 5 letters
-                Description = "Description.",           // Ship description
+                Name        = "My Player",              // Full ingame display name, 16 letters max
+                ShortName   = "PLR-" + count,           // Short display name, 5 letters
+                Description = "Description!",           // Ship description
                 Class       = ShipClass.Scorpion,
                 HullColor   = new Color(0x80_CF_CF_CF),
                 DecalColor  = count == 1 ? Color.Blue : Color.Red,
@@ -50,7 +50,7 @@ namespace Andromedroids
 
         /// <summary>
         /// Where you write your initialization logic. Called only once at the start of the game/round.
-        /// Your AI gets a maximum of five seconds, and is disqualified if this is exceeded.
+        /// Your AI gets a maximum of three seconds, and is disqualified if this is exceeded.
         /// </summary>
         public override void Initialize()
         {
@@ -61,13 +61,13 @@ namespace Andromedroids
         /// Called once per frame, this is where you write the real-time logic for your ship. 
         /// All the input is sent through the return value Configuration, which in turn will affect your ship
         /// Keep in mind that slow code is disregarded; if you take too long you will skip frames, a potential disadvantage.
-        /// Delta time is added up if you skip frames, and is 0.0f on frame one.
+        /// Delta time is added up if you skip frames, and is 0.0f on frame one (divide by zero exceptions are possible).
         /// </summary>
         public override Configuration Update(float deltaTime)
         {
             // Math, logic, etc.
 
-            // If the total power returned exceeds base.
+            // If the total power returned exceeds base.TotalPower all settings will default to zero.
             Configuration config = new Configuration()
             {
                 thrusterPower = 0,

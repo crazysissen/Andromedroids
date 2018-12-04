@@ -49,6 +49,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Scripts\Framework\Bullet.cs" />
     <Compile Include="Scripts\Framework\ByteStreamer.cs" />
     <Compile Include="Scripts\Framework\CheatDetection.cs" />
     <Compile Include="Scripts\Framework\ContentController.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="Scripts\Framework\In.cs" />
     <Compile Include="Scripts\Framework\ManagedWorldObject.cs" />
     <Compile Include="Scripts\Framework\MathA.cs" />
+    <Compile Include="Scripts\Framework\PlayerManager.cs" />
     <Compile Include="Scripts\Framework\Scoreboard.cs" />
     <Compile Include="Scripts\Framework\Sound.cs" />
     <Compile Include="Scripts\Framework\StatWindow.cs" />
@@ -67,7 +69,7 @@
     <Compile Include="Scripts\Framework\Renderer.cs" />
     <Compile Include="Scripts\Framework\ShipPlayer.cs" />
     <Compile Include="Scripts\Framework\StartupConfig.cs" />
-    <Compile Include="Scripts\Framework\StateManage.cs" />
+    <Compile Include="Scripts\Framework\StateManager.cs" />
     <Compile Include="Scripts\Framework\Weapon.cs" />
     <Compile Include="Scripts\XNA\Game1.cs" />
     <Compile Include="Scripts\XNA\Program.cs" />

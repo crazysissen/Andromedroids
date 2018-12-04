@@ -11,7 +11,7 @@ namespace Andromedroids
     {
         /// <summary>Accelerating sine. Equation that from 0-1 accelerates according to a sine wave</summary>
         public static float SineA(float value)
-            => (float)Math.Sin((double)value * Math.PI * 0.5);
+            => (float)Math.Sin(value * Math.PI * 0.5);
 
         /// <summary>Decellerating sine. Equation that from 0-1 decellerates according to a sine wave</summary>
         public static float SineD(float value)

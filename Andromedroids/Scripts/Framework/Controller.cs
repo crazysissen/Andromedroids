@@ -15,9 +15,9 @@ namespace Andromedroids
     public class MainController
     {
         const int
-            MAPRADIUS = 16,
-            MINSPAWNDISTANCE = 6,
-            MAXSPAWNDISTANCE = 12;
+            MAPRADIUS = 40,
+            MINSPAWNDISTANCE = 1,
+            MAXSPAWNDISTANCE = 2;
 
         private static CheatDetection cheat;
 
@@ -139,7 +139,7 @@ namespace Andromedroids
 
         public void Update(XNAController systemController, GameTime gameTime, float deltaTimeScaled)
         {
-            int state = stateManager.Peek();
+            int state = stateManager.Peek;
 
             switch (stateManager.GameState)
             {
@@ -244,8 +244,8 @@ namespace Andromedroids
         {
             PlayerManager[] players = new PlayerManager[2]
             {
-                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType)),
-                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType))
+                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType), 0),
+                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType), 1)
             };
 
             StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);
@@ -275,8 +275,8 @@ namespace Andromedroids
         {
             PlayerManager[] players = new PlayerManager[2]
             {
-                new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType)),
-                new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType))
+                new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType), 0),
+                new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(quickstartPlayers[0].playerType), 1)
             };
 
             StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE);

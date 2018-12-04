@@ -37,15 +37,9 @@ namespace Andromedroids
             SubStateStack.Push(state);
         }
 
-        public int Peek()
-        {
-            return SubStateStack.Peek();
-        }
+        public int Peek => SubStateStack.Peek();
 
-        public int Pop()
-        {
-            return SubStateStack.Pop();
-        }
+        public int Pop => SubStateStack.Pop();
 
         public void Replace(int state)
         {

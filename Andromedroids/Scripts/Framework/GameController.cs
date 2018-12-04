@@ -15,12 +15,15 @@ namespace Andromedroids
     class GameController
     {
         const float
-            INTROTIME = 5.0f,
+            INTROTIME = 2.0f,
             ZOOMOUTTIME = 0.5f,
-            CAMERAOFFSETPROPORTION = 7.0f / 18.0f,
+            EXTRAWAITTIME = 0.4F,
             STARTZOOM = 0.1f,
             DEFAULTZOOM = 1 / 0.85f,
             ZOOMMULTIPLIER = 0.7071f;
+
+        const int
+            CAMERAOFFSET = -10;
 
         private XNAController controller;
         private MainController mainController;
@@ -29,12 +32,12 @@ namespace Andromedroids
         private bool running;
         private float startCountdown;
         private PlayerManager[] players;
+        private List<Bullet>[] bullets = new List<Bullet>[] { new List<Bullet>(), new List<Bullet>() };
         private Random r;
         private HashKey key;
         private System.Timers.Timer timer;
         private Texture2D[] speedControlSprites;
         private Song song;
-
         private GUI.Button speedControl;
 
         private Renderer.Sprite backgroundSquare;
@@ -92,7 +95,7 @@ namespace Andromedroids
             for (int i = 0; i < players.Length; ++i)
             {
                 // Perform initial setup of AIs
-                players[i].FW_Setup(key, i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
+                players[i].FW_Setup(key, players[(i + 1) % 2], i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : startRotation - (float)Math.PI);
 
                 // Initialize stat windows
                 statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
@@ -113,7 +116,6 @@ namespace Andromedroids
             for (int i = 0; i < players.Length; i++)
             {
                 players[i].FW_Initialize(key);
-
             }
 
             // Set up the text connectors
@@ -130,8 +132,13 @@ namespace Andromedroids
 
         public void StartGame()
         {
-            timer.Elapsed += UpdateStatistics;
             timer = new System.Timers.Timer(500);
+            timer.Elapsed += UpdateStatistics;
+
+            foreach (PlayerManager player in players)
+            {
+                player.FW_Start(key);
+            }
         }
 
         public void EndGame()
@@ -151,7 +158,7 @@ namespace Andromedroids
             //(DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER);
 
             Camera camera = RendererController.GetCamera(key);
-            camera.Position = averagePosition;
+            camera.Position = averagePosition + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));
 
             switch (state)
             {
@@ -178,12 +185,17 @@ namespace Andromedroids
                         camera.Scale = STARTZOOM.Lerp(targetScale, progress) ;
                     }
 
-                    if (startCountdown > INTROTIME + ZOOMOUTTIME)
+                    if (startCountdown > INTROTIME + ZOOMOUTTIME && startCountdown < INTROTIME + ZOOMOUTTIME + EXTRAWAITTIME)
+                    {
+
+                    }
+
+                    if (startCountdown > INTROTIME + ZOOMOUTTIME + EXTRAWAITTIME)
                     {
                         camera.Scale = targetScale;
                         state = 1;
 
-                        players[0].FW_Start(key);
+                        StartGame();
                     }
 
                     break;
@@ -203,7 +215,7 @@ namespace Andromedroids
 
                         foreach (PlayerManager player in players)
                         {
-                            player.FW_Update(key, gameTime, deltaTimeScaled);
+                            player.FW_Update(key, gameTime, deltaTimeScaled, bullets);
                         }
                     }
 
@@ -217,6 +229,11 @@ namespace Andromedroids
                 case 3:
                     break;
             }
+        }
+
+        public void AddBullet(HashKey key, Bullet bullet, int team)
+        {
+
         }
 
         private void DrawAbbreviations(Camera camera)
