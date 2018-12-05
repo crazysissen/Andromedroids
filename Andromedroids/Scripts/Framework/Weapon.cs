@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Andromedroids
 {
-    sealed class Weapon
+    public sealed class Weapon
     {
         public enum StartType
         {

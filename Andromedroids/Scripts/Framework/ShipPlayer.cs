@@ -22,7 +22,7 @@ namespace Andromedroids
 
     /// <summary>Contains the player itself, and a bunch of information to be used in an AI.
     /// Remmber that changing these will bear no effect.</summary>
-    abstract class ShipPlayer : ManagedWorldObject
+    public abstract class ShipPlayer : ManagedWorldObject
     {
         public const float
             HITRADIUS = 1.0f;
@@ -66,7 +66,7 @@ namespace Andromedroids
         public abstract void PowerupActivation(Powerup powerupType);
     }
 
-    enum Powerup
+    public enum Powerup
     {
         /// <summary>Thruster speed multiplier</summary>
         Speed,
@@ -81,7 +81,7 @@ namespace Andromedroids
         Power,
     }
 
-    struct PowerupInfo
+    public struct PowerupInfo
     {
         public Powerup Powerup { get; set; }
         public float RemainingTime { get; set; }

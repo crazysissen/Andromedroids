@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace Andromedroids
 {
-    class ManagedWorldObject
+    public class ManagedWorldObject
     {
         private static List<ManagedWorldObject> objects = new List<ManagedWorldObject>();
 

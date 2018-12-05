@@ -9,9 +9,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
-    enum ShipClass { Scorpion, Hadronic, Bulwark, Ironclad }
+    public enum ShipClass { Scorpion, Hadronic, Bulwark, Ironclad }
 
-    struct StartupConfig
+    public struct StartupConfig
     {
         const int
             WEAPONCOUNT = 6;

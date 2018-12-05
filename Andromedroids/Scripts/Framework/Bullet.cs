@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Andromedroids
 {
-    class Bullet
+    public class Bullet
     {
         const int
             BULLETTYPECOUNT = 3;
@@ -99,7 +99,7 @@ namespace Andromedroids
             => Vector2.Distance(player.Position, Position) < ShipPlayer.HITRADIUS + HitRadius;
     }
 
-    struct BulletInfo
+    public struct BulletInfo
     {
         public Bullet.BulletType Type { get; set; }
         public Vector2 Position { get; set; }

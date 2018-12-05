@@ -312,6 +312,5 @@ namespace Andromedroids
             public string menuName;
             public Type playerType;
         }
-
     }
 }

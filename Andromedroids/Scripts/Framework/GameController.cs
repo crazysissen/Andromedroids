@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace Andromedroids
 {
-    class GameController
+    public class GameController
     {
         const float
             INTROTIME = 2.0f,

@@ -156,7 +156,7 @@ namespace Andromedroids
         }
     }
 
-    abstract class Renderer
+    public abstract class Renderer
     {
         const float
             DEGTORAD = (2 * (float)Math.PI) / 360,

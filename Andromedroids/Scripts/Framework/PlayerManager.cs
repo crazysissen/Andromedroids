@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Andromedroids
 {
-    sealed class PlayerManager
+    public sealed class PlayerManager
     {
         const float
             SPEEDDIMINISH = 0.85f;
