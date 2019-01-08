@@ -9,6 +9,10 @@ namespace Andromedroids
 {
     static class MathA
     {
+        public const float
+            DEGTORAD = (2 * (float)Math.PI) / 360,
+            RADTODEG = 360 / (2 * (float)Math.PI);
+
         /// <summary>Accelerating sine. Equation that from 0-1 accelerates according to a sine wave</summary>
         public static float SineA(float value)
             => (float)Math.Sin(value * Math.PI * 0.5);
@@ -34,6 +38,10 @@ namespace Andromedroids
             return vector;
         }
 
+        public static float Min(this float value, float minimum) => value < minimum ? minimum : value;
+
+        public static float Max(this float value, float maximum) => value > maximum ? maximum : value;
+
         public static float Clamp(this float value, float min, float max)
         {
             if (value > max)
@@ -43,6 +51,22 @@ namespace Andromedroids
                 return min;
 
             return value;
+        }
+
+        public static void ClampThis(this float value, float min, float max)
+        {
+            if (value > max)
+                value = max;
+
+            if (value < min)
+                value = min;
+        }
+
+        public static Vector2 Normalized(this Vector2 vector)
+        {
+            Vector2 returnVector = vector;
+            returnVector.Normalize();
+            return returnVector;
         }
     }
 }

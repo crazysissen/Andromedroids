@@ -34,35 +34,34 @@ namespace Andromedroids
         public Vector2 OpponentPosition { get; set; }
         public float OpponentRotation { get; set; }
         public Vector2 OpponentVelocity { get; set; }
-        public Weapon.Type[] OpponentWeapons { get; set; }
-         
+        public WeaponType[] OpponentWeapons { get; set; }
+        /// <summary>Opponent's currently active powerups</summary>
+        public PowerupInfo[] OpponentActivePowerups { get; set; }
+
         public BulletInfo[] OpponentBullets { get; set; }
         public BulletInfo[] FriendlyBullets { get; set; }
 
         public bool FirstFrame { get; set; }
-        public int TotalPower { get; set; }
-        public int UnusedPower { get; set; }
+        public float TotalPower { get; set; }
+        public float UnusedPower { get; set; }
 
         /// <summary>The type of the given weapon</summary>
-        public Weapon.Type[] WeaponType { get; set; }
-        /// <summary>The time needed between shots for given weapon</summary>
-        public float[] WeaponCooldown { get; set; }
-        /// <summary>Remaining cooldown for given weapon</summary>
-        public float[] WeaponCooldownRemaining { get; set; }
-        /// <summary>How much power the weapon needs to function normally (most efficiently)</summary>
-        public int[] WeaponPowerNeeded { get; set; }
+        public WeaponType[] WeaponType { get; set; }
         /// <summary>How much power the weapon needs to work at maximum capacity</summary>
-        public int[] WeaponPowerMax { get; set; }
+        public float[] WeaponPowerMax { get; set; }
         /// <summary>If the weapon is ready to fire</summary>
         public bool[] WeaponReady { get; set; }
 
-        /// <summary>Currently active powerups</summary>
+        /// <summary>Currently active powerups on player</summary>
         public PowerupInfo[] ActivePowerups { get; set; }
+
+        /// <summary>Powerups currently on the map</summary>
+        public PowerupWorldInfo[] Powerups { get; set; }
 
         public abstract StartupConfig GetConfig();
         public abstract void Initialize();
         public abstract Configuration Update(float deltaTime);
-        public abstract int ReplaceWeapon(Weapon.Type weaponType);
+        public abstract int ReplaceWeapon(WeaponType weaponType);
         public abstract void PowerupActivation(Powerup powerupType);
     }
 
@@ -87,10 +86,29 @@ namespace Andromedroids
         public float RemainingTime { get; set; }
     }
 
+    public struct WeaponInfo
+    {
+        public WeaponType Type { get; set; }
+        public float WeaponPowerMax { get; set; }
+    }
+
+    public struct PowerupWorldInfo
+    {
+        public Powerup Powerup { get; set; }
+        public Vector2 Position { get; set; }
+        public float RemainingDespawnTime { get; set; }
+    }
+
     public struct Configuration
     {
-        public int targetRotation, thrusterPower, rotationPower, shieldPower;
-        public int[] weaponPower;
+        public float targetRotation, thrusterPower, rotationPower, shieldPower;
+        public float[] weaponPower;
         public bool[] weaponFire;
+
+        public static Configuration Empty => new Configuration()
+        {
+            weaponFire = new bool[6],
+            weaponPower = new float[6]
+        };
     }
 }

@@ -36,13 +36,14 @@ namespace Andromedroids
         private HashKey key;
         //private float remainingTime;
 
-        public Bullet(HashKey key, BulletType type, Vector2 position, Vector2 velocity, float rotation, GameController controller)
+        public Bullet(HashKey key, BulletType type, Vector2 position, Vector2 velocity, int damage, float rotation, GameController controller)
         {
             if (key.Validate("Bullet Constructor"))
             {
                 this.key = key;
                 this.controller = controller;
 
+                Damage = damage;
                 Position = position;
                 Velocity = velocity;
                 Rotation = rotation;
@@ -75,7 +76,7 @@ namespace Andromedroids
                 Trigger(targetPlayer);
             }
 
-            Position += Velocity;
+            Position += Velocity * deltaTime;
 
             renderer.Position = Position;
             renderer.Rotation = Rotation;

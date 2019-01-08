@@ -16,8 +16,8 @@ namespace Andromedroids
     {
         const int
             MAPRADIUS = 40,
-            MINSPAWNDISTANCE = 1,
-            MAXSPAWNDISTANCE = 2;
+            MINSPAWNDISTANCE = 12,
+            MAXSPAWNDISTANCE = 12;
 
         private static CheatDetection cheat;
 

@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Andromedroids
 {
-    // Don't remove this attribute, it's how the game will find your AI!
+    // Don't remove the "ShipAI" attribute, it's how the game will find your AI!
     // The string entered will be the menu display name, which is cropped to a maximum of 16 characters.
     // The bool entered will determine if it is to be eglible for a quickstart, there must be exactly two AIs labled this way for it to work.
     [ShipAI("My Player", true)]
@@ -30,12 +30,11 @@ namespace Andromedroids
             return new StartupConfig()
             {
                 Name        = "My Player",              // Full ingame display name, 16 letters max
-                ShortName   = "PLR-" + count,           // Short display name, 5 letters
+                ShortName   = "PLR-" + count,           // Short name abbreviation, 5 letters
                 Description = "Description!",           // Ship description
-                Class       = ShipClass.Scorpion,
-                HullColor   = new Color(0x80_CF_CF_CF),
-                DecalColor  = count == 1 ? Color.Blue : Color.Red,
-                //= new Color(0, 0, 50),
+                Class       = ShipClass.Scorpion,       // Ship class
+                HullColor   = new Color(0x80_CF_CF_CF), // Ship hull color
+                DecalColor  = count == 1 ? Color.Blue : Color.Red,  // Ship decal color (also the team color)
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
                 {
                     Weapon.StartType.CaliberCannon,
@@ -54,7 +53,11 @@ namespace Andromedroids
         /// </summary>
         public override void Initialize()
         {
+
+
             // Math, logic, etc.
+
+
         }
 
         /// <summary>
@@ -65,25 +68,27 @@ namespace Andromedroids
         /// </summary>
         public override Configuration Update(float deltaTime)
         {
+
+
             // Math, logic, etc.
 
-            // If the total power returned exceeds base.TotalPower all settings will default to zero.
-            Configuration config = new Configuration()
+            
+            Configuration config = new Configuration() // If the total power returned exceeds [base.TotalPower], all settings will default to zero.
             {
-                thrusterPower = 0,
-                shieldPower = 0,
-                rotationPower = 0,
+                thrusterPower = 6.0f,
+                shieldPower = 0.0f,
+                rotationPower = 6.0f,
 
-                targetRotation = 0,
+                targetRotation = 3.0f,
 
-                weaponPower = new int[]
+                weaponPower = new float[]
                 {
-                    0, 0, 0, 0, 0, 0
+                    6.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
                 },
 
                 weaponFire = new bool[]
                 {
-                    false, false, false, false, false, false
+                    true, false, false, false, false, false
                 }
             };
 
@@ -93,9 +98,12 @@ namespace Andromedroids
         /// <summary>
         /// Called when a new weapon is picked up, and requests the weapon slot to be filled/replaced.
         /// </summary>
-        public override int ReplaceWeapon(Weapon.Type weaponType)
+        public override int ReplaceWeapon(WeaponType weaponType)
         {
+
+
             // Math, logic, etc.
+
 
             return 0;
         }
@@ -105,7 +113,11 @@ namespace Andromedroids
         /// </summary>
         public override void PowerupActivation(Powerup powerupType)
         {
-            
+
+
+            // Math, logic, etc.
+
+
         }
     }
 }

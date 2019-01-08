@@ -71,7 +71,7 @@
     <Compile Include="Scripts\Framework\StartupConfig.cs" />
     <Compile Include="Scripts\Framework\StateManager.cs" />
     <Compile Include="Scripts\Framework\Weapon.cs" />
-    <Compile Include="Scripts\XNA\Game1.cs" />
+    <Compile Include="Scripts\XNA\Game.cs" />
     <Compile Include="Scripts\XNA\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

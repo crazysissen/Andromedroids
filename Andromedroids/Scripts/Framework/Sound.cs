@@ -21,9 +21,13 @@ namespace Andromedroids
     public static class Sound
     {
         public static float SFXVolume { get; private set; }
+        public static float MusicVolume { get; private set; }
 
         private static bool _initialized;
         private static SoundEffect[] _effects;
+
+        private static SoundEffectInstance[] _playingEffects;
+        private static SoundEffectInstance _song;
 
         public static void Initialize()
         {
@@ -41,12 +45,32 @@ namespace Andromedroids
             _effects[(int)sfx].Play(SFXVolume, 0.0f, 0.0f);
         }
 
-        public static void SetVolume(HashKey key, float volume)
+        public static void SetSFXVolume(HashKey key, float volume)
         {
             if (key.Validate("Sound.SetVolume"))
             {
                 SFXVolume = volume;
+
+                foreach (SoundEffectInstance effect in _playingEffects)
+                {
+
+                }
             }
+        }
+
+        public static void SetMusicVolume(HashKey key, float volume)
+        {
+            if (key.Validate("Sound.SetVolume"))
+            {
+                MusicVolume = volume;
+            }
+        }
+
+        public static void PlaySong(SoundEffect effect)
+        {
+            _song = effect.CreateInstance();
+            _song.Play();
+            _song.IsLooped = true;
         }
     }
 }

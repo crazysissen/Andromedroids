@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
@@ -9,11 +11,17 @@ namespace Andromedroids
     public sealed class PlayerManager
     {
         const float
-            SPEEDDIMINISH = 0.85f;
+            MAXACCELERATION = 0.8f,
+            MAXSPEED = 1.0f,
+            MAXROTATIONSPEED = 8.0f * MathA.DEGTORAD,
+            ACCELERATIONPERPOWER = MAXACCELERATION / MAXTHRUSTERPOWER,
+            DECELLERATIONPERSPEED = MAXACCELERATION / MAXSPEED;
 
         const int
-            MAXPOWER = 16,
-            POWERBOOST = 8;
+            MAXPOWER = 160,
+            POWERBOOST = 8,
+            MAXTHRUSTERPOWER = 6,
+            MAXROTATIONPOWER = 4;
 
         public ShipPlayer Player { get; private set; }
 
@@ -29,27 +37,27 @@ namespace Andromedroids
         public Color PlayerDecalColor { get; private set; }
         public Texture2D PlayerTexture { get; private set; }
 
-        private Weapon[] weapons;
-        private PlayerManager opponent;
-        private ManualResetEvent frameStart = new ManualResetEvent(false);
-        private XNAController controller;
-        private GameController gameController;
-        private Thread playerThread, startThread;
-        private Renderer.Sprite renderer;
-        private HashKey key;
-        private double currentTimePeriod, totalTime;
-        private int currentFrameCount, totalFrameCount;
-        private bool inUpdate, run, firstFrame;
-        private float[] remainingPowerupTime;
+        private Weapon[] _weapons;
+        private PlayerManager _opponent;
+        private ManualResetEvent _frameStart = new ManualResetEvent(false);
+        private XNAController _controller;
+        private GameController _gameController;
+        private Thread _playerThread, _startThread;
+        private Renderer.Sprite _renderer;
+        private HashKey _key;
+        private double _currentTimePeriod, _totalTime;
+        private int _currentFrameCount, _totalFrameCount;
+        private bool _inUpdate, _run, _firstFrame;
+        private float[] _remainingPowerupTime;
 
-        private Configuration latestConfig;
+        private Configuration latestConfig = Configuration.Empty;
 
         public PlayerManager(HashKey key, XNAController controller, ShipPlayer player, int playerNumber)
         {
             if (key.Validate("PlayerManager Constructor"))
             {
-                this.controller = controller;
-                this.key = key;
+                this._controller = controller;
+                this._key = key;
 
                 PlayerNumber = playerNumber;
                 Player = player;
@@ -63,8 +71,8 @@ namespace Andromedroids
         {
             if (key.Validate("ShipPlayer.Setup"))
             {
-                opponent = opponentManager;
-                this.gameController = gameController;
+                _opponent = opponentManager;
+                this._gameController = gameController;
 
                 StartupConfig config = Player.GetConfig();
                 Weapon.StartType[] weaponTypes = config.Weapons;
@@ -83,15 +91,15 @@ namespace Andromedroids
                 Texture2D texture = ContentController.Get<Texture2D>(config.Class.ToString());
                 PlayerTexture = NewTexture(texture, PlayerHullColor, PlayerDecalColor);
 
-                weapons = new Weapon[6];
+                _weapons = new Weapon[6];
                 for (int i = 0; i < 6; i++)
                 {
-                    weapons[i] = new Weapon(key, (Weapon.Type)weaponTypes[i], position, i, rotation, PlayerNumber, gameController);
+                    _weapons[i] = new Weapon(key, (WeaponType)weaponTypes[i], position, i, rotation, PlayerNumber, gameController);
                 }
 
-                remainingPowerupTime = new float[4];
-                firstFrame = true;
-                renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+                _remainingPowerupTime = new float[4];
+                _firstFrame = true;
+                _renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
 
                 Debug.WriteLine(PlayerName + ": SETUP");
             }
@@ -103,11 +111,11 @@ namespace Andromedroids
             {
                 Debug.WriteLine(PlayerName + ": INITIALIZE");
 
-                startThread = new Thread(Player.Initialize)
+                _startThread = new Thread(Player.Initialize)
                 {
                     Name = PlayerName + "[START THREAD]"
                 };
-                startThread.Start();
+                _startThread.Start();
             }
         }
 
@@ -118,11 +126,11 @@ namespace Andromedroids
                 Debug.WriteLine(PlayerName + ": START");
 
                 CreateThread();
-                playerThread.Start();
+                _playerThread.Start();
 
-                run = true;
+                _run = true;
 
-                return playerThread.ManagedThreadId;
+                return _playerThread.ManagedThreadId;
             }
 
             return 0;
@@ -135,87 +143,151 @@ namespace Andromedroids
         {
             if (key.Validate("ShipPlayer.Update [Player:" + ShortName + "]"))
             {
-                List<PowerupInfo> powerupInfo = new List<PowerupInfo>();
-                for (int i = 0; i < remainingPowerupTime.Length; i++)
+                // Executing the players choices first 
+
+                #region Execution
+
+                if (PlayerNumber == 1)
+                    return;
+
+                Configuration config = _firstFrame ? Configuration.Empty : latestConfig;
+
+                float 
+                    totalAvailablePower = PowerupActive(Powerup.Power) ? MAXPOWER + POWERBOOST : MAXPOWER, 
+                    totalPower = config.rotationPower + config.shieldPower + config.thrusterPower + config.weaponPower.Sum();
+
+                if (totalPower > totalAvailablePower)
                 {
-                    remainingPowerupTime[i] -= scaledDeltaTime;
-
-                    if (remainingPowerupTime[i] < 0)
-                    {
-                        remainingPowerupTime[i] = 0;
-                    }
-
-                    powerupInfo.Add(new PowerupInfo()
-                    {
-                        Powerup = (Powerup)i,
-                        RemainingTime = remainingPowerupTime[i]
-                    });
+                    config = Configuration.Empty;
                 }
 
-                List<BulletInfo>[] bulletInfos = new List<BulletInfo>[2];
-                for (int i = 0; i < 2; i++)
+                float
+                    thrusterPower = config.thrusterPower.Clamp(0, MAXTHRUSTERPOWER),
+                    shieldPower = config.shieldPower.Min(0),
+                    rotationPower = config.rotationPower.Clamp(0, MAXROTATIONPOWER);
+
+                // Updating weapons
+                for (int i = 0; i < 6; ++i)
                 {
-                    bulletInfos[i] = new List<BulletInfo>();
+                    _weapons[i].Power = config.weaponPower[i].Clamp(0, _weapons[i].PowerMaximum);
 
-                    foreach (Bullet bullet in allBullets[i])
+                    _weapons[i].SetPosition(Player.Position, i, Player.Rotation);
+                    _weapons[i].Update(scaledDeltaTime);
+
+                    if (config.weaponFire[i])
                     {
-                        bulletInfos[i].Add(new BulletInfo()
-                        {
-                            Type = bullet.Type,
-                            Position = bullet.Position,
-                            Velocity = bullet.Velocity,
-                            Damage = bullet.Damage,
-                            BlastRadius = bullet.BlastRadius
-                            //Guided = bullet.Guided
-                        });
-                    }
-                }
-
-                Configuration config = latestConfig;
-                int totalPower = PowerupActive(Powerup.Power) ? MAXPOWER + POWERBOOST : MAXPOWER;
-                Weapon.Type[] opponentWeapons = new Weapon.Type[6];
-                int[] weaponPowerMin = new int[6], weaponPowerMax = new int[6];
-                float[] weaponCooldown = new float[6], weaponCooldownRemaining = new float[6];
-                bool[] weaponReady = new bool[6];
-                int unusedPower = totalPower;
-
-                for (int i = 0; i < 6; i++)
-                {
-                    weapons[i].SetPosition(Player.Position, i, Player.Rotation);
-
-                    if (opponent.weapons[i] != null)
-                    {
-                        opponentWeapons[i] = opponent.weapons[i].WeaponType;
+                        _weapons[i].TryFire(Player.Position, i, Player.Rotation);
                     }
                 }
 
-                Player.OpponentHealth = opponent.Health;
-                Player.OpponentShield = opponent.Shield;
-                Player.OpponentPosition = opponent.Player.Position;
-                Player.OpponentRotation = opponent.Player.Rotation;
-                Player.OpponentVelocity = opponent.Player.Velocity;
-                Player.OpponentWeapons = opponentWeapons;
+                // Resistance evens out with acceleration at MAXSPEED if thrusters are at max power, otherwise the maximum speed will be lower
+                Vector2 resistance = Player.Velocity * DECELLERATIONPERSPEED * scaledDeltaTime;
+                Vector2 acceleration = ACCELERATIONPERPOWER * config.thrusterPower * (new Vector2(0, -1)).Rotate(Player.Rotation) * scaledDeltaTime;
 
-                Player.FriendlyBullets = bulletInfos[PlayerNumber].ToArray();
-                Player.OpponentBullets = bulletInfos[(PlayerNumber + 1) % 2].ToArray();
+                Player.SetVelocity(key, Player.Velocity + acceleration - resistance);
 
-                Player.FirstFrame = firstFrame;
-                Player.TotalPower = totalPower;
+                float multiplier = config.targetRotation < 0 ? -1 : 1;
+                float targetRotation = multiplier * (Math.Abs(config.targetRotation) % ((float)Math.PI * 2));
 
-                renderer.Position = Player.Position;
-                renderer.Rotation = Player.Rotation;
+                if (targetRotation < 0)
+                {
+                    targetRotation += (float)Math.PI * 2;
+                }
 
-                if (inUpdate)
+                float effectiveRotation = targetRotation - Player.Rotation;
+                float possibleRotation = MAXROTATIONSPEED * (config.rotationPower / MAXROTATIONPOWER) * scaledDeltaTime;
+                float newRotation = Player.Rotation + effectiveRotation.Clamp(-possibleRotation, possibleRotation);
+
+                if (newRotation > Math.PI * 2)
+                {
+                    newRotation -= (float)Math.PI * 2;
+                }
+
+                if (newRotation < 0)
+                {
+                    newRotation += (float)Math.PI * 2;
+                }
+
+                Debug.WriteLine("New Rotation: " + newRotation);
+                Player.SetRotation(key, newRotation);
+
+                #endregion
+
+                if (_inUpdate)
                 {
 
 
                     return;
                 }
 
-                frameStart.Set();
-                Thread.Sleep(2);
-                frameStart.Reset();
-                firstFrame = false;
+                // Setting the player up for a new update cycle, always happens just before a new update is issued
+
+                #region Variable Setup
+
+                List<PowerupInfo> powerupInfo = UpdatePowerups(scaledDeltaTime);
+
+                List<BulletInfo>[] bulletInfos = GetBulletInfos(allBullets);
+
+                WeaponType[] opponentWeapons = new WeaponType[6], playerWeapons = new WeaponType[6];
+                float[] weaponPowerMin = new float[6], weaponPowerMax = new float[6];
+                float[] weaponCooldown = new float[6], weaponCooldownRemaining = new float[6];
+                bool[] weaponReady = new bool[6];
+
+                float unusedPower = totalPower - config.thrusterPower + config.rotationPower + config.shieldPower;
+
+                for (int i = 0; i < 6; i++)
+                {
+                    if (_weapons[i] != null)
+                    {
+                        unusedPower -= config.weaponPower[i];
+
+                        playerWeapons[i] = _weapons[i].WeaponType;
+                        weaponPowerMax[i] = _weapons[i].PowerMaximum;
+                        weaponCooldown[i] = _weapons[i].MaxCooldown;
+                        weaponCooldownRemaining[i] = _weapons[i].Cooldown;
+                        weaponReady[i] = weaponCooldownRemaining[i] <= 0;
+                    }
+
+                    if (_opponent._weapons[i] != null)
+                    {
+                        opponentWeapons[i] = _opponent._weapons[i].WeaponType;
+                    }
+                }
+
+                Player.OpponentHealth = _opponent.Health;
+                Player.OpponentShield = _opponent.Shield;
+                Player.OpponentPosition = _opponent.Player.Position;
+                Player.OpponentRotation = _opponent.Player.Rotation;
+                Player.OpponentVelocity = _opponent.Player.Velocity;
+                Player.OpponentWeapons = opponentWeapons;
+
+                Player.FriendlyBullets = bulletInfos[PlayerNumber].ToArray();
+                Player.OpponentBullets = bulletInfos[(PlayerNumber + 1) % 2].ToArray();
+
+                Player.FirstFrame = _firstFrame;
+                Player.UnusedPower = unusedPower;
+                Player.TotalPower = totalPower;
+
+                Player.WeaponType = playerWeapons;
+                Player.WeaponPowerMax = weaponPowerMax;
+                Player.WeaponReady = weaponReady;
+
+                #endregion
+
+                _renderer.Position = Player.Position;
+                _renderer.Rotation = Player.Rotation;
+
+                // Executing update cycle in AI
+
+                #region Frame Trigger
+
+                _frameStart.Set();
+                Thread.Sleep(1);
+                _frameStart.Reset();
+
+                #endregion
+
+                _firstFrame = false;
             }
         }
 
@@ -243,23 +315,23 @@ namespace Andromedroids
                 {
                     returnValue = new TimeStats()
                     {
-                        time = totalTime + currentTimePeriod,
-                        frameCount = totalFrameCount + currentFrameCount
+                        time = _totalTime + _currentTimePeriod,
+                        frameCount = _totalFrameCount + _currentFrameCount
                     };
                 }
                 else
                 {
-                    totalTime += currentTimePeriod;
-                    totalFrameCount += currentFrameCount;
+                    _totalTime += _currentTimePeriod;
+                    _totalFrameCount += _currentFrameCount;
 
                     returnValue = new TimeStats()
                     {
-                        time = currentTimePeriod,
-                        frameCount = currentFrameCount
+                        time = _currentTimePeriod,
+                        frameCount = _currentFrameCount
                     };
 
-                    currentTimePeriod = 0.0;
-                    currentFrameCount = 0;
+                    _currentTimePeriod = 0.0;
+                    _currentFrameCount = 0;
                 }
 
                 return returnValue;
@@ -280,18 +352,18 @@ namespace Andromedroids
                 speedTimer = new Stopwatch(),
                 deltaTimeTimer = null;
 
-            while (run)
+            while (_run)
             {
-                inUpdate = false;
+                _inUpdate = false;
 
-                frameStart.WaitOne(3);
+                _frameStart.WaitOne();
 
-                inUpdate = true;
+                _inUpdate = true;
                 speedTimer.Restart();
 
                 latestConfig = Player.Update(GetTime(deltaTimeTimer));
 
-                ++currentFrameCount;
+                ++_currentFrameCount;
 
                 double elapsed = speedTimer.Elapsed.TotalMilliseconds;
             }
@@ -313,15 +385,63 @@ namespace Andromedroids
 
         private void CreateThread()
         {
-            playerThread = new Thread(RunUpdate)
+            _playerThread = new Thread(RunUpdate)
             {
                 Name = PlayerName
             };
         }
 
+        private List<PowerupInfo> UpdatePowerups(float scaledDeltaTime)
+        {
+            List<PowerupInfo> returnList = new List<PowerupInfo>();
+
+            for (int i = 0; i < _remainingPowerupTime.Length; i++)
+            {
+                _remainingPowerupTime[i] -= scaledDeltaTime;
+
+                if (_remainingPowerupTime[i] < 0)
+                {
+                    _remainingPowerupTime[i] = 0;
+                }
+
+                returnList.Add(new PowerupInfo()
+                {
+                    Powerup = (Powerup)i,
+                    RemainingTime = _remainingPowerupTime[i]
+                });
+            }
+
+            return returnList;
+        }
+
+        private List<BulletInfo>[] GetBulletInfos(List<Bullet>[] allBullets)
+        {
+            List<BulletInfo>[] returnArray = new List<BulletInfo>[2];
+
+            for (int i = 0; i < 2; i++)
+            {
+                returnArray[i] = new List<BulletInfo>();
+
+                foreach (Bullet bullet in allBullets[i])
+                {
+                    returnArray[i].Add(new BulletInfo()
+                    {
+                        Type = bullet.Type,
+                        Position = bullet.Position,
+                        Velocity = bullet.Velocity,
+                        Damage = bullet.Damage,
+                        BlastRadius = bullet.BlastRadius
+                        //Guided = bullet.Guided
+                    });
+                }
+            }
+
+            return returnArray;
+        }
+
         private Texture2D NewTexture(Texture2D sprite, Color hullColor, Color decalColor)
         {
-            Texture2D newTexture = new Texture2D(controller.GraphicsDevice, sprite.Width, sprite.Height);
+            Texture2D newTexture = new Texture2D(_controller.GraphicsDevice, sprite.Width, sprite.Height);
 
             Color[] colors = new Color[sprite.Height * sprite.Width];
             sprite.GetData(colors);
@@ -356,7 +476,7 @@ namespace Andromedroids
         }
 
         public bool PowerupActive(Powerup type)
-            => remainingPowerupTime[(int)type] > 0;
+            => _remainingPowerupTime[(int)type] > 0;
 
         public struct TimeStats
         {

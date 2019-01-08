@@ -155,19 +155,19 @@
 
 #begin Sound/Music/Andromedroids.mp3
 /importer:Mp3Importer
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sound/Music/Andromedroids.mp3
 
 #begin Sound/Music/AndromedroidsBright.mp3
 /importer:Mp3Importer
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sound/Music/AndromedroidsBright.mp3
 
 #begin Sound/Music/AndromedroidsMenu.mp3
 /importer:Mp3Importer
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sound/Music/AndromedroidsMenu.mp3
 

@@ -136,7 +136,7 @@ namespace Andromedroids
             {
                 if (contentDictionary[tag] is T)
                 {
-                    return (T)contentDictionary[tag];
+                    return ((T)contentDictionary[tag]);
                 }
 
                 return default(T);
