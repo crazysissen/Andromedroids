@@ -29,6 +29,7 @@ namespace Andromedroids
 
             return new StartupConfig()
             {
+
                 Name        = "My Player",              // Full ingame display name, 16 letters max
                 ShortName   = "PLR-" + count,           // Short name abbreviation, 5 letters
                 Description = "Description!",           // Ship description
@@ -75,11 +76,11 @@ namespace Andromedroids
             
             Configuration config = new Configuration() // If the total power returned exceeds [base.TotalPower], all settings will default to zero.
             {
-                thrusterPower = 6.0f,
-                shieldPower = 0.0f,
+                thrusterPower = 0f,
+                shieldPower = 50.0f,
                 rotationPower = 6.0f,
 
-                targetRotation = 3.0f,
+                targetRotation = Position.RotationTowards(OpponentPosition),
 
                 weaponPower = new float[]
                 {

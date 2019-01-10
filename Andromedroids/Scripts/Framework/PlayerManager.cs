@@ -11,24 +11,33 @@ namespace Andromedroids
     public sealed class PlayerManager
     {
         const float
+            HITDURATION = 0.35f,
             MAXACCELERATION = 0.8f,
             MAXSPEED = 1.0f,
             MAXROTATIONSPEED = 8.0f * MathA.DEGTORAD,
             ACCELERATIONPERPOWER = MAXACCELERATION / MAXTHRUSTERPOWER,
-            DECELLERATIONPERSPEED = MAXACCELERATION / MAXSPEED;
+            DECELLERATIONPERSPEED = MAXACCELERATION / MAXSPEED,
+            SHIELDREGENMULTUIPLIER = 1.0f / 5; // 1/X where X is how much power is needed for each shield/second
 
         const int
+            HITALPHA = 150,
             MAXPOWER = 160,
+            MAXSHIELD = 100,
+            STARTSHIELD = 50,
             POWERBOOST = 8,
             MAXTHRUSTERPOWER = 6,
             MAXROTATIONPOWER = 4;
+
+        readonly Color
+            shieldMaxColor = new Color(160, 245, 255, 80),
+            shieldMinColor = new Color(220, 220, 220, 25);
 
         public ShipPlayer Player { get; private set; }
 
         public int PlayerNumber { get; private set; }
 
         public int Health { get; private set; }
-        public float Shield { get; private set; }
+        public int Shield { get; private set; }
 
         public string PlayerName { get; private set; }
         public string ShortName { get; private set; }
@@ -43,8 +52,9 @@ namespace Andromedroids
         private XNAController _controller;
         private GameController _gameController;
         private Thread _playerThread, _startThread;
-        private Renderer.Sprite _renderer;
+        private Renderer.Sprite _renderer, _shieldRenderer;
         private HashKey _key;
+        private float _shieldRegenProgress, _hitEffectCooldown;
         private double _currentTimePeriod, _totalTime;
         private int _currentFrameCount, _totalFrameCount;
         private bool _inUpdate, _run, _firstFrame;
@@ -100,6 +110,7 @@ namespace Andromedroids
                 _remainingPowerupTime = new float[4];
                 _firstFrame = true;
                 _renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+                _shieldRenderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), ContentController.Get<Texture2D>("HitRadius"), Player.Position, Vector2.One, shieldMinColor, 0);
 
                 Debug.WriteLine(PlayerName + ": SETUP");
             }
@@ -147,10 +158,10 @@ namespace Andromedroids
 
                 #region Execution
 
-                if (PlayerNumber == 1)
-                    return;
-
+                // There should be no config for frame 1
                 Configuration config = _firstFrame ? Configuration.Empty : latestConfig;
+
+                // - Reading and verifying the values returned
 
                 float 
                     totalAvailablePower = PowerupActive(Powerup.Power) ? MAXPOWER + POWERBOOST : MAXPOWER, 
@@ -166,7 +177,8 @@ namespace Andromedroids
                     shieldPower = config.shieldPower.Min(0),
                     rotationPower = config.rotationPower.Clamp(0, MAXROTATIONPOWER);
 
-                // Updating weapons
+                // - Updating weapons
+
                 for (int i = 0; i < 6; ++i)
                 {
                     _weapons[i].Power = config.weaponPower[i].Clamp(0, _weapons[i].PowerMaximum);
@@ -180,11 +192,15 @@ namespace Andromedroids
                     }
                 }
 
+                // - Updating velocity
+
                 // Resistance evens out with acceleration at MAXSPEED if thrusters are at max power, otherwise the maximum speed will be lower
                 Vector2 resistance = Player.Velocity * DECELLERATIONPERSPEED * scaledDeltaTime;
                 Vector2 acceleration = ACCELERATIONPERPOWER * config.thrusterPower * (new Vector2(0, -1)).Rotate(Player.Rotation) * scaledDeltaTime;
 
                 Player.SetVelocity(key, Player.Velocity + acceleration - resistance);
+
+                // - Updating rotation
 
                 float multiplier = config.targetRotation < 0 ? -1 : 1;
                 float targetRotation = multiplier * (Math.Abs(config.targetRotation) % ((float)Math.PI * 2));
@@ -208,8 +224,52 @@ namespace Andromedroids
                     newRotation += (float)Math.PI * 2;
                 }
 
-                Debug.WriteLine("New Rotation: " + newRotation);
                 Player.SetRotation(key, newRotation);
+
+                // - Updating shields
+
+                if (Shield >= MAXSHIELD)
+                {
+                    // Shield should not progress towards regen at 100 power
+                    _shieldRegenProgress = 0;
+                }
+                else
+                {
+                    _shieldRegenProgress += scaledDeltaTime * SHIELDREGENMULTUIPLIER * shieldPower;
+
+                    if (_shieldRegenProgress > 1)
+                    {
+                        --_shieldRegenProgress;
+                        ++Shield;
+                    }
+                }
+
+                // - Updating renderers
+
+                _renderer.Position = Player.Position;
+                _renderer.Rotation = Player.Rotation;
+
+                float colorLerp = 0;
+
+                if (_hitEffectCooldown > 0)
+                {
+                    _hitEffectCooldown -= scaledDeltaTime;
+
+                    colorLerp = _hitEffectCooldown / HITDURATION;
+                }
+
+                if (_hitEffectCooldown < 0)
+                {
+                    _hitEffectCooldown = 0;
+
+                    colorLerp = 0;
+                }
+
+                _shieldRenderer.Position = Player.Position;
+                _shieldRenderer.Color = Color.Lerp(
+                    new Color(shieldMinColor, shieldMinColor.A + colorLerp * (HITALPHA - shieldMinColor.A)),
+                    new Color(shieldMaxColor, shieldMinColor.A + colorLerp * (HITALPHA - shieldMaxColor.A)),
+                    (float)Shield / MAXSHIELD);
 
                 #endregion
 
@@ -273,9 +333,6 @@ namespace Andromedroids
                 Player.WeaponReady = weaponReady;
 
                 #endregion
-
-                _renderer.Position = Player.Position;
-                _renderer.Rotation = Player.Rotation;
 
                 // Executing update cycle in AI
 
@@ -343,7 +400,17 @@ namespace Andromedroids
         public void Damage(HashKey key, int damage)
         {
             if (key.Validate("PlayerManager.Damage [Player:" + ShortName + "]"))
-            Health -= damage;
+            {
+                _hitEffectCooldown = HITDURATION;
+
+                if (Shield > damage)
+                {
+                    Shield -= damage;
+                    return;
+                }
+
+                Health -= damage - Shield;
+            }
         }
 
         private void RunUpdate()

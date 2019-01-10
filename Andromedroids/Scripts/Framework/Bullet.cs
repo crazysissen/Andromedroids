@@ -21,7 +21,7 @@ namespace Andromedroids
         static Texture2D speck;
         static Texture2D[] bulletTextures;
 
-        public float HitRadius { get; set; }
+        public float HitRadius { get; set; } = 0.05f;
         public float Rotation { get; set; }
         public int Damage { get; set; }
         //public bool Guided { get; set; }
@@ -80,20 +80,13 @@ namespace Andromedroids
 
             renderer.Position = Position;
             renderer.Rotation = Rotation;
-
-            if (IsColliding(targetPlayer.Player))
-            {
-                Trigger(targetPlayer);
-            }
         }
 
         public void Trigger(PlayerManager targetPlayer)
         {
-            if (Vector2.Distance(targetPlayer.Player.Position, Position) < ShipPlayer.HITRADIUS + BlastRadius)
-            {
-                targetPlayer.Damage(key, Damage);
-                controller.RemoveBullet(this, (targetPlayer.PlayerNumber + 1) % 2);
-            }
+            targetPlayer.Damage(key, Damage);
+            renderer.Destroy();
+            controller.RemoveBullet(this, (targetPlayer.PlayerNumber + 1) % 2);
         }
 
         bool IsColliding(ShipPlayer player)

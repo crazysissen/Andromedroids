@@ -38,6 +38,9 @@ namespace Andromedroids
             return vector;
         }
 
+        public static float RotationTowards(this Vector2 origin, Vector2 target) 
+            => (float)Math.Atan2(target.Y - origin.Y, target.X - origin.X);
+
         public static float Min(this float value, float minimum) => value < minimum ? minimum : value;
 
         public static float Max(this float value, float maximum) => value > maximum ? maximum : value;
@@ -51,15 +54,6 @@ namespace Andromedroids
                 return min;
 
             return value;
-        }
-
-        public static void ClampThis(this float value, float min, float max)
-        {
-            if (value > max)
-                value = max;
-
-            if (value < min)
-                value = min;
         }
 
         public static Vector2 Normalized(this Vector2 vector)

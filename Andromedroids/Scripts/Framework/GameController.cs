@@ -32,7 +32,9 @@ namespace Andromedroids
         private bool running;
         private float startCountdown;
         private PlayerManager[] players;
-        private List<Bullet>[] bullets = new List<Bullet>[] { new List<Bullet>(), new List<Bullet>() };
+        private List<Bullet>[] 
+            bullets = new List<Bullet>[] { new List<Bullet>(), new List<Bullet>() },
+            removeQueue = new List<Bullet>[] { new List<Bullet>(), new List<Bullet>() };
         private Random r;
         private HashKey key;
         private System.Timers.Timer timer;
@@ -219,6 +221,13 @@ namespace Andromedroids
                             {
                                 bullet.Update(deltaTimeScaled, players[(i + 1) % 2]);
                             }
+
+                            foreach (Bullet bullet in removeQueue[i])
+                            {
+                                bullets[i].Remove(bullet);
+                            }
+
+                            removeQueue[i].Clear();
                         }
 
                         foreach (PlayerManager player in players)
@@ -246,7 +255,7 @@ namespace Andromedroids
 
         public void RemoveBullet(Bullet bullet, int team)
         {
-            bullets[team].Remove(bullet);
+            removeQueue[team].Add(bullet);
         }
 
         private void DrawAbbreviations(Camera camera)
