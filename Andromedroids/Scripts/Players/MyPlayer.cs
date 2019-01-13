@@ -37,8 +37,8 @@ namespace Andromedroids
                 DecalColor  = count == 1 ? Color.Blue : Color.Red,  // Ship decal color (also the team color)
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
                 {
-                    Weapon.StartType.CaliberCannon,
-                    Weapon.StartType.CaliberCannon,
+                    Weapon.StartType.GatlingGun,
+                    Weapon.StartType.GatlingGun,
                     Weapon.StartType.GatlingGun,
                     Weapon.StartType.GatlingGun,
                     Weapon.StartType.GatlingGun,
@@ -83,12 +83,12 @@ namespace Andromedroids
 
                 weaponPower = new float[]
                 {
-                    6.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+                    6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f
                 },
 
                 weaponFire = new bool[]
                 {
-                    true, false, false, false, false, false
+                    true, true, true, true, true, true
                 }
             };
 
