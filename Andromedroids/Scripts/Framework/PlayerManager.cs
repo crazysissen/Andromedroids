@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -25,6 +26,7 @@ namespace Andromedroids
             MAXPOWER = 160,
             MAXSHIELD = 100,
             STARTSHIELD = 50,
+            STARTHEALTH = 100,
             POWERBOOST = 8,
             MAXTHRUSTERPOWER = 6,
             MAXROTATIONPOWER = 4;
@@ -47,6 +49,7 @@ namespace Andromedroids
         public Color PlayerDecalColor { get; private set; }
         public Texture2D PlayerTexture { get; private set; }
 
+        Weapon.StartType[] _weaponTypes;
         private Weapon[] _weapons;
         private PlayerManager _opponent;
         private ManualResetEvent _frameStart = new ManualResetEvent(false);
@@ -63,32 +66,41 @@ namespace Andromedroids
 
         private Configuration latestConfig = Configuration.Empty;
 
-        public PlayerManager(HashKey key, XNAController controller, ShipPlayer player, int playerNumber)
+        public PlayerManager(HashKey key, XNAController controller, ShipPlayer player)
         {
             if (key.Validate("PlayerManager Constructor"))
             {
                 this._controller = controller;
                 this._key = key;
 
-                PlayerNumber = playerNumber;
                 Player = player;
             }
+        }
+
+        public PlayerManager New(HashKey key)
+        {
+            if (key.Validate("PlayerManager.New"))
+            {
+                PlayerManager newPlayer = (PlayerManager)MemberwiseClone();
+
+                newPlayer.Player = (ShipPlayer)Activator.CreateInstance(Player.GetType());
+
+                return newPlayer;
+            }
+
+            return null;
         }
 
         /// <summary>
         /// FRAMEWORK. NOT to be used in the AI. Will register as a cheat.
         /// </summary>
-        public void FW_Setup(HashKey key, GameController gameController, PlayerManager opponentManager, Vector2 position, float rotation, int playerNumber)
+        public void FW_Setup(HashKey key)
         {
             if (key.Validate("ShipPlayer.Setup"))
             {
-                _opponent = opponentManager;
-                _gameController = gameController;
-
-                PlayerNumber = playerNumber;
-
                 StartupConfig config = Player.GetConfig();
-                Weapon.StartType[] weaponTypes = config.Weapons;
+
+                _weaponTypes = config.Weapons;
 
                 PlayerName = config.Name.Length <= 16 ? config.Name : config.Name.Substring(0, 16);
                 ShortName = config.ShortName.Length <= 5 ? config.ShortName : config.ShortName.Substring(0, 5);
@@ -96,34 +108,46 @@ namespace Andromedroids
                 PlayerHullColor = config.HullColor;
                 PlayerDecalColor = config.DecalColor;
 
-                CreateThread();
-
-                Player.SetRotation(key, rotation);
-                Player.SetPosition(key, position);
-
                 Texture2D texture = ContentController.Get<Texture2D>(config.Class.ToString());
                 PlayerTexture = NewTexture(texture, PlayerHullColor, PlayerDecalColor);
-
-                _weapons = new Weapon[6];
-                for (int i = 0; i < 6; i++)
-                {
-                    _weapons[i] = new Weapon(key, (WeaponType)weaponTypes[i], position, i, rotation, PlayerNumber, gameController);
-                }
-
-                _remainingPowerupTime = new float[4];
-                _firstFrame = true;
-                _renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
-                _shieldRenderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), ContentController.Get<Texture2D>("HitRadius"), Player.Position, Vector2.One * (Camera.WORLDUNITPIXELS / 300.0f), shieldMinColor, 0);
 
                 Debug.WriteLine(PlayerName + ": SETUP");
             }
         }
 
-        public void FW_Initialize(HashKey key)
+        public void FW_Initialize(HashKey key, Vector2 position, GameController gameController, PlayerManager opponentManager, float rotation, int playerNumber)
         {
             if (key.Validate("ShipPlayer.Initialize [Player:" + ShortName + "]"))
             {
-                Debug.WriteLine(PlayerName + ": INITIALIZE");
+                Debug.WriteLine(PlayerName + ": INITIALIZATION");
+
+                _opponent = opponentManager;
+                _gameController = gameController;
+
+                CreateThread();
+
+                PlayerNumber = playerNumber;
+
+                Health = STARTHEALTH;
+                Shield = STARTSHIELD;
+
+                Player.SetRotation(key, rotation);
+                Player.SetPosition(key, position);
+
+                _weapons = new Weapon[6];
+                for (int i = 0; i < 6; i++)
+                {
+                    _weapons[i] = new Weapon(key, (WeaponType)_weaponTypes[i], position, i, rotation, PlayerNumber, gameController);
+                }
+
+                _totalFrameCount = 0;
+                _currentFrameCount = 0;
+                _currentTimePeriod = 0;
+                _totalTime = 0;
+                _remainingPowerupTime = new float[4];
+                _firstFrame = true;
+                _renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
+                _shieldRenderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), ContentController.Get<Texture2D>("HitRadius"), Player.Position, Vector2.One * (Camera.WORLDUNITPIXELS / 300.0f), shieldMinColor, 0);
 
                 _startThread = new Thread(Player.Initialize)
                 {
@@ -421,6 +445,14 @@ namespace Andromedroids
             }
 
             return new PlayerInfo();
+        }
+
+        public void FW_End(HashKey key)
+        {
+            if (key.Validate("PlayerManager.End"))
+            {
+                _run = false;
+            }
         }
 
         public void Damage(HashKey key, int damage)

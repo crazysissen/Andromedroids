@@ -20,9 +20,9 @@ namespace Andromedroids
             GatlingGun = 0, RocketLauncher = 1, CaliberCannon = 2
         }
 
-        
+        private static Texture2D[] readyWeaponTextures, cooldownWeaponTextures;
+        private static Random r;
 
-        static Texture2D[] readyWeaponTextures, cooldownWeaponTextures;
 
         public WeaponType WeaponType { get; }
 
@@ -49,6 +49,9 @@ namespace Andromedroids
         {
             if (key.Validate("Weapon Constructor"))
             {
+                if (r == null)
+                    r = new Random();
+
                 _team = team;
                 _key = key;
                 _controller = controller;
@@ -60,22 +63,22 @@ namespace Andromedroids
                 {
                     case WeaponType.GatlingGun:
                         Damage = 2;
-                        Spread = 14.0f;
-                        FireRateAtMax = 0.65f;
+                        Spread = (10.0f / 360) * (float)Math.PI * 2;
+                        FireRateAtMax = 1.5f;
                         PowerMaximum = 5.0f;
                         Velocity = 4.0f;
                         break;
 
                     case WeaponType.RocketLauncher:
-                        Damage = 8;
-                        FireRateAtMax = 0.20f;
+                        Damage = 25;
+                        FireRateAtMax = 0.15f;
                         PowerMaximum = 6.0f;
                         Velocity = 1.8f;
                         break;
 
                     case WeaponType.CaliberCannon:
                         Damage = 10;
-                        FireRateAtMax = 0.35f;
+                        FireRateAtMax = 0.20f;
                         PowerMaximum = 6.0f;
                         Velocity = 2.5f;
                         break;
@@ -126,7 +129,7 @@ namespace Andromedroids
             };
 
             Vector2 position = origin + (weaponOffsets[slot] / Camera.WORLDUNITPIXELS * 2).Rotate(currentRotation);
-            float rotation = ForwardRotation(currentRotation, slot);
+            float rotation = ForwardRotation(currentRotation, slot) + (float)r.NextDouble() * Spread - Spread * 0.5f;
             Bullet bullet = new Bullet(_key, (Bullet.BulletType)WeaponType, position, (new Vector2(0, -1)).Rotate(rotation) * Velocity, Damage, rotation, _controller);
 
             _controller.AddBullet(bullet, _team);

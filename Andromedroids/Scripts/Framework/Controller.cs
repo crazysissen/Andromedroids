@@ -87,7 +87,9 @@ namespace Andromedroids
                     {
                         string menuName = (attribute as ShipAI).MenuName;
 
-                        PlayerManager current = new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(type), 0);
+                        PlayerManager current = new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(type));
+
+                        current.FW_Setup(key);
 
                         allPlayers.Add(current);
 
@@ -268,17 +270,6 @@ namespace Andromedroids
             RendererController.Draw(key, graphics, spriteBatch, gameTime);
         }
 
-        void Setup(XNAController systemController, MenuPlayer[] menuPlayers)
-        {
-            PlayerManager[] players = new PlayerManager[2]
-            {
-                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[0].playerType), 0),
-                new PlayerManager(key, systemController, (ShipPlayer)Activator.CreateInstance(menuPlayers[1].playerType), 1)
-            };
-
-            StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE, false);
-        }
-
         void StartGame(PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance, bool quickStart)
         {
             if (wuRadius < wuMaxDistance)
@@ -303,8 +294,8 @@ namespace Andromedroids
         {
             PlayerManager[] players = new PlayerManager[2]
             {
-                quickstartPlayers[0],
-                quickstartPlayers[0]
+                quickstartPlayers[0].New(key),
+                quickstartPlayers[0].New(key)
             };
 
             StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE, true);

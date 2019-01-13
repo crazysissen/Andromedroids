@@ -35,6 +35,8 @@ namespace Andromedroids
             bool[] nestedPlayers = new bool[highestPower];
             int excessRemaining = excess, currentPower = 1, currentStep = 1, currentStepSize = 0;
 
+            // 
+
             while (excessRemaining > 0)
             {
                 if (currentStep == currentPower)
@@ -55,6 +57,8 @@ namespace Andromedroids
                 ++currentStep;
                 --excessRemaining;
             }
+
+            // Filling the bracket array with the most fair arrangment of players
 
             for (int i = 0; i <= hPower; ++i)
             {
@@ -83,6 +87,10 @@ namespace Andromedroids
                     }
                 }
             }
+
+            // Set up a queue of matches that will be played
+
+            Matches = new Queue<Match>();
 
             for (int i = lPower - 1; i >= 0; --i)
             {

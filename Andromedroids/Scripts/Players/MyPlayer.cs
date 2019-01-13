@@ -31,11 +31,11 @@ namespace Andromedroids
             {
 
                 Name        = "My Player",              // Full ingame display name, 16 letters max
-                ShortName   = "PLR-" + count,           // Short name abbreviation, 5 letters
+                ShortName   = "EMPTY",                  // Short name abbreviation, 5 letters
                 Description = "Description!",           // Ship description
                 Class       = ShipClass.Scorpion,       // Ship class
-                HullColor   = new Color(0x80_CF_CF_CF), // Ship hull color
-                DecalColor  = count == 1 ? Color.Blue : Color.Red,  // Ship decal color (also the team color)
+                HullColor   = new Color(0xFF_CF_CF_CF), // Ship hull color
+                DecalColor  = new Color(0xFF_FF_FF_FF), // Ship decal color (also the team color)
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
                 {
                     Weapon.StartType.GatlingGun,

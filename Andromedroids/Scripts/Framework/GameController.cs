@@ -97,15 +97,6 @@ namespace Andromedroids
             // Setup the stat windows visible in-game
             statWindows = new StatWindow[2];
 
-            for (int i = 0; i < players.Length; ++i)
-            {
-                // Perform initial setup of AIs
-                players[i].FW_Setup(key, this, players[(i + 1) % 2], i == 0 ? startPosition : -startPosition, i == 0 ? startRotation : (startRotation + (float)Math.PI) %((float) Math.PI * 2));
-
-                // Initialize stat windows
-                statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
-            }
-
             // Setup the speed control switch
             speedControl = new GUI.Button(new Rectangle(res.X - 130, 20, 110, 14), speedControlSprites[1], GUI.Button.DefaultColors(), GUI.Button.Transition.Switch, 0.05f);
             speedControl.OnClick += SpeedControlClick; 
@@ -117,10 +108,13 @@ namespace Andromedroids
             running = true;
             state = 0;
 
-            // Initialize the players
             for (int i = 0; i < players.Length; i++)
             {
-                players[i].FW_Initialize(key);
+                // Initialize the players
+                players[i].FW_Initialize(key, i == 0 ? startPosition : -startPosition, this, players[(i + 1) % 2], i == 0 ? startRotation : (startRotation + (float)Math.PI) % ((float)Math.PI * 2), i);
+
+                // Initialize stat windows
+                statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
             }
 
             // Set up the text connectors
@@ -233,6 +227,12 @@ namespace Andromedroids
 
                         foreach (PlayerManager player in players)
                         {
+                            if (player.Health <= 0 || player)
+                            {
+                                player.FW_End(key);
+                                break;
+                            }
+
                             player.FW_Update(key, gameTime, deltaTimeScaled, bullets);
                         }
                     }
