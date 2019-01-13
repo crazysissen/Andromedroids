@@ -51,7 +51,7 @@ namespace Andromedroids
 
             renderMasks.Clear();
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointWrap);
+            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.NonPremultiplied, SamplerState.PointWrap);
 
             renderers = renderers.OrderBy(o => o.Layer.LayerDepth).ToList();
 

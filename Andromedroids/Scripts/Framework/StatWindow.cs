@@ -31,7 +31,6 @@ namespace Andromedroids
 
         Renderer.SpriteScreen panel, miniature;
         Renderer.Text name, skippedFrames, skippedFramesPercentage, averageTime, targetRotation;
-        Renderer.SpriteScreen[] powerBars, powerups;
 
         Renderer.Text[] Texts => new Renderer.Text[] { skippedFrames, skippedFramesPercentage, averageTime, targetRotation };
 

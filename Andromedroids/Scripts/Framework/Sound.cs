@@ -68,9 +68,17 @@ namespace Andromedroids
 
         public static void PlaySong(SoundEffect effect)
         {
+            StopSong();
+
             _song = effect.CreateInstance();
-            _song.Play();
             _song.IsLooped = true;
+            _song.Play();
+        }
+
+        public static void StopSong()
+        {
+            _song?.Stop();
+            _song = null;
         }
     }
 }
