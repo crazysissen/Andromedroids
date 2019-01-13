@@ -11,6 +11,7 @@ namespace Andromedroids
     public sealed class PlayerManager
     {
         const float
+            BYTETOFLOAT = 1.0f / 255,
             HITDURATION = 0.35f,
             MAXACCELERATION = 0.8f,
             MAXSPEED = 1.0f,
@@ -77,12 +78,14 @@ namespace Andromedroids
         /// <summary>
         /// FRAMEWORK. NOT to be used in the AI. Will register as a cheat.
         /// </summary>
-        public void FW_Setup(HashKey key, GameController gameController, PlayerManager opponentManager, Vector2 position, float rotation)
+        public void FW_Setup(HashKey key, GameController gameController, PlayerManager opponentManager, Vector2 position, float rotation, int playerNumber)
         {
             if (key.Validate("ShipPlayer.Setup"))
             {
                 _opponent = opponentManager;
-                this._gameController = gameController;
+                _gameController = gameController;
+
+                PlayerNumber = playerNumber;
 
                 StartupConfig config = Player.GetConfig();
                 Weapon.StartType[] weaponTypes = config.Weapons;
@@ -110,7 +113,7 @@ namespace Andromedroids
                 _remainingPowerupTime = new float[4];
                 _firstFrame = true;
                 _renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
-                _shieldRenderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), ContentController.Get<Texture2D>("HitRadius"), Player.Position, Vector2.One, shieldMinColor, 0);
+                _shieldRenderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), ContentController.Get<Texture2D>("HitRadius"), Player.Position, Vector2.One * (Camera.WORLDUNITPIXELS / 300.0f), shieldMinColor, 0);
 
                 Debug.WriteLine(PlayerName + ": SETUP");
             }
@@ -211,6 +214,12 @@ namespace Andromedroids
                 }
 
                 float effectiveRotation = targetRotation - Player.Rotation;
+
+                if (effectiveRotation > Math.PI)
+                {
+                    effectiveRotation -= (float)Math.PI * 2; 
+                }
+
                 float possibleRotation = MAXROTATIONSPEED * (config.rotationPower / MAXROTATIONPOWER) * scaledDeltaTime;
                 float newRotation = Player.Rotation + effectiveRotation.Clamp(-possibleRotation, possibleRotation);
 
@@ -218,7 +227,7 @@ namespace Andromedroids
                 {
                     newRotation -= (float)Math.PI * 2;
                 }
-
+                
                 if (newRotation < 0)
                 {
                     newRotation += (float)Math.PI * 2;
@@ -249,27 +258,28 @@ namespace Andromedroids
                 _renderer.Position = Player.Position;
                 _renderer.Rotation = Player.Rotation;
 
-                float colorLerp = 0;
+                float alphaLerp = 0;
 
                 if (_hitEffectCooldown > 0)
                 {
                     _hitEffectCooldown -= scaledDeltaTime;
 
-                    colorLerp = _hitEffectCooldown / HITDURATION;
+                    alphaLerp = _hitEffectCooldown / HITDURATION;
                 }
 
                 if (_hitEffectCooldown < 0)
                 {
                     _hitEffectCooldown = 0;
 
-                    colorLerp = 0;
+                    alphaLerp = 0;
                 }
 
+                float colorLerp = (float)Shield / MAXSHIELD;
+
+                float colorAlpha = (shieldMinColor.A * BYTETOFLOAT).Lerp(shieldMaxColor.A * BYTETOFLOAT, colorLerp).Lerp(HITALPHA * BYTETOFLOAT, alphaLerp);
+
                 _shieldRenderer.Position = Player.Position;
-                _shieldRenderer.Color = Color.Lerp(
-                    new Color(shieldMinColor, shieldMinColor.A + colorLerp * (HITALPHA - shieldMinColor.A)),
-                    new Color(shieldMaxColor, shieldMinColor.A + colorLerp * (HITALPHA - shieldMaxColor.A)),
-                    (float)Shield / MAXSHIELD);
+                _shieldRenderer.Color = new Color(Color.Lerp(shieldMinColor, shieldMaxColor, (float)Shield / MAXSHIELD), colorAlpha);
 
                 #endregion
 
@@ -397,6 +407,22 @@ namespace Andromedroids
             return new TimeStats();
         }
 
+        public PlayerInfo FW_GetPlayerInfo(HashKey key)
+        {
+            if (key.Validate("Player.GetPlayerInfo [Player:" + ShortName + "]"))
+            {
+                return new PlayerInfo()
+                {
+                    config = latestConfig,
+                    time = FW_GetElapsedTimes(key, false),
+                    health = Health,
+                    shield = Shield
+                };
+            }
+
+            return new PlayerInfo();
+        }
+
         public void Damage(HashKey key, int damage)
         {
             if (key.Validate("PlayerManager.Damage [Player:" + ShortName + "]"))
@@ -433,8 +459,9 @@ namespace Andromedroids
                 ++_currentFrameCount;
 
                 double elapsed = speedTimer.Elapsed.TotalMilliseconds;
-            }
 
+                _currentTimePeriod += elapsed;
+            }
         }
 
         private static float GetTime(Stopwatch stopwatch)
@@ -549,6 +576,13 @@ namespace Andromedroids
         {
             public double time;
             public int frameCount;
+        }
+
+        public struct PlayerInfo
+        {
+            public TimeStats time;
+            public int shield, health;
+            public Configuration config;
         }
     }
 }

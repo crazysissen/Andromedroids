@@ -199,7 +199,7 @@ namespace Andromedroids
             private Color _startColor, _targetColor;
             private Texture2D _startTexture, _targetTexture;
             private State _startState;
-            private SoundEffect effect, hoverEffect = ContentController.Get<SoundEffect>("MenuBlipNeutral");
+            private SoundEffect effect;
 
             /// <summary>Testing button</summary>
             public Button(Rectangle transform)
@@ -269,59 +269,7 @@ namespace Andromedroids
                 bool onButton = Transform.Contains(mouse.Position);
                 bool pressed = mouse.LeftButton == ButtonState.Pressed;
 
-                if (pressed && !_pressedLastFrame && onButton)
-                {
-                    _beginHoldOnButton = true;
-                }
-
-                if (CurrentState != State.Idle && !onButton)
-                {
-                    OnExit?.Invoke();
-                    ChangeState(State.Idle);
-                }
-                else switch (CurrentState)
-                {
-                    case State.Idle:
-                        if (onButton)
-                        {
-                            OnEnter?.Invoke();
-                            hoverEffect.Play();
-                            if (pressed)
-                            {
-                                ChangeState(State.Pressed);
-                                if (!_pressedLastFrame)
-                                    OnMouseDown?.Invoke();
-                            }
-                            if (!pressed)
-                                ChangeState(State.Hovered);
-                        }
-                        break;
-
-                    case State.Hovered:
-                        if (onButton && pressed && _beginHoldOnButton)
-                        {
-                            OnMouseDown?.Invoke();
-                            ChangeState(State.Pressed);
-                        }
-                        break;
-
-                    case State.Pressed:
-                        if (!pressed && onButton)
-                        {
-                            ChangeState(State.Hovered);
-                            if (_beginHoldOnButton)
-                            {
-                                OnClick?.Invoke();
-
-                                if (effect != null)
-                                {
-                                    effect.Play();
-                                }
-                            }
-                        }
-                        break;
-                }
-
+                Transfer(pressed, onButton);
 
                 List<TA> textures = new List<TA>();
                 Color color = Color.White;
@@ -382,6 +330,62 @@ namespace Andromedroids
                 }
 
                 _pressedLastFrame = pressed;
+            }
+
+            private void Transfer(bool pressed, bool onButton)
+            {
+                if (pressed && !_pressedLastFrame && onButton)
+                {
+                    _beginHoldOnButton = true;
+                }
+
+                if (CurrentState != State.Idle && !onButton)
+                {
+                    OnExit?.Invoke();
+                    ChangeState(State.Idle);
+                }
+                else
+                    switch (CurrentState)
+                    {
+                        case State.Idle:
+                            if (onButton)
+                            {
+                                OnEnter?.Invoke();
+                                if (pressed)
+                                {
+                                    ChangeState(State.Pressed);
+                                    if (!_pressedLastFrame)
+                                        OnMouseDown?.Invoke();
+                                }
+                                if (!pressed)
+                                    ChangeState(State.Hovered);
+                            }
+                            break;
+
+                        case State.Hovered:
+                            if (onButton && pressed && _beginHoldOnButton)
+                            {
+                                OnMouseDown?.Invoke();
+                                ChangeState(State.Pressed);
+                            }
+                            break;
+
+                        case State.Pressed:
+                            if (!pressed && onButton)
+                            {
+                                ChangeState(State.Hovered);
+                                if (_beginHoldOnButton)
+                                {
+                                    OnClick?.Invoke();
+
+                                    if (effect != null)
+                                    {
+                                        effect.Play();
+                                    }
+                                }
+                            }
+                            break;
+                    }
             }
 
             private void ChangeState(State state)

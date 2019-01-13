@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Andromedroids
 {
@@ -39,7 +40,7 @@ namespace Andromedroids
         private HashKey key;
         private System.Timers.Timer timer;
         private Texture2D[] speedControlSprites;
-        private Song song;
+        private SoundEffect song;
         private GUI.Button speedControl;
 
         private Renderer.Sprite backgroundSquare;
@@ -61,8 +62,10 @@ namespace Andromedroids
             }
         }
 
-        public void Initialize(XNAController controller, Renderer.SpriteScreen backgroundRenderer, Song song, Texture2D background, PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance)
+        public void Initialize(XNAController controller, Renderer.SpriteScreen backgroundRenderer, SoundEffect song, Texture2D background, PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance, bool quickStart)
         {
+            TournamentBracket bracket = new TournamentBracket(new PlayerManager[] { players [0], players[0], players[0], players[0], players[0], players[0], players[0], players[0], players[0], players[0]} );
+
             this.song = song;
             this.controller = controller;
             this.players = players;
@@ -73,7 +76,7 @@ namespace Andromedroids
             Point res = XNAController.DisplayResolution;
 
             // Play song
-            MediaPlayer.Play(song);
+            Sound.PlaySong(song);
 
             // Set the background
             backgroundRenderer.Texture = background;
@@ -154,10 +157,8 @@ namespace Andromedroids
             float playerDistance = distance.Length();
 
             Vector2 averagePosition = 0.5f * (players[0].Player.Position + players[1].Player.Position);
-            float absX = Math.Abs(distance.X), absY = Math.Abs(distance.Y);
 
-            float targetScale = 1 / (/*Math.Abs((absX > absY ? absX : absY) / playerDistance) * */ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance);
-            //(DEFAULTZOOM * playerDistance * ZOOMMULTIPLIER);
+            float targetScale = 1 / (ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance);
 
             Camera camera = RendererController.GetCamera(key);
             camera.Position = averagePosition + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));

@@ -21,7 +21,7 @@ namespace Andromedroids
         static int count;
 
         /// <summary>
-        /// Requested initially when the game starts. This is where you customize your ship.
+        /// Requested initially when the application starts. This is where you customize your ship. 
         /// </summary>
         public override StartupConfig GetConfig()
         {
@@ -80,7 +80,7 @@ namespace Andromedroids
                 shieldPower = 50.0f,
                 rotationPower = 6.0f,
 
-                targetRotation = Position.RotationTowards(OpponentPosition),
+                targetRotation = Position.RotationTowards(RendererController.Camera.ScreenToWorldPosition(In.MousePosition.ToVector2())),
 
                 weaponPower = new float[]
                 {

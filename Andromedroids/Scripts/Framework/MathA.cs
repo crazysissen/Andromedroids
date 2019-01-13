@@ -38,6 +38,58 @@ namespace Andromedroids
             return vector;
         }
 
+        public static int HighestPowerLessThanOrEqual(this int number, out int power)
+        {
+            if (number < 2)
+            {
+                power = 0;
+
+                return 0;
+            }
+
+            power = 1;
+
+            int current = 2;
+
+            while (current * 2 <= number)
+            {
+                ++power;
+
+                current *= 2;
+            }
+
+            return current;
+        }
+
+        public static int HighestPowerLessThanOrEqual(this int number)
+            => number.HighestPowerLessThanOrEqual(out int voidInt);
+
+        public static int LowestPowerMoreThanOrEqual(this int number, out int power)
+        {
+            if (number <= 0)
+            {
+                power = 0;
+
+                return 0;
+            }
+
+            power = 1;
+
+            int current = 2;
+
+            while (current < number)
+            {
+                ++power;
+
+                current *= 2;
+            }
+
+            return current;
+        }
+
+        public static int LowestPowerMoreThanOrEqual(this int number)
+            => number.LowestPowerMoreThanOrEqual(out int voidInt);
+
         public static float RotationTowards(this Vector2 origin, Vector2 target) 
             => (float)Math.Atan2(target.Y - origin.Y, target.X - origin.X);
 

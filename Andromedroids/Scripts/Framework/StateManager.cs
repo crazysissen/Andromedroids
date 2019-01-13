@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Andromedroids
 {
-    public enum GameState { QuickMenu, MainMenu, InGame, Tournament, StartGame, End, Transition }
+    public enum GameState { QuickMenu, MainMenu, InGame, Tournament, StartGame, End, Exit, Transition }
 
     class StateManager
     {
