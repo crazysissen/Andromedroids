@@ -10,10 +10,10 @@ using Microsoft.Xna.Framework.Input;
 namespace Andromedroids
 {
     // Don't remove the "ShipAI" attribute, it's how the game will find your AI!
-    // The string entered will be the menu display name, which is cropped to a maximum of 12 characters.
+    // The string entered will be the menu display name, which is cropped to a maximum of 16 characters.
     // The bool entered will determine if it is to be eglible for a quickstart, there must be exactly two AIs labled this way for it to work.
-    [ShipAI("My Player", true)]
-    class MyPlayer : ShipPlayer
+    [ShipAI("My Player 5", true)]
+    class MyPlayer5 : ShipPlayer
     {
 
         // Feel free to add your own member variables!

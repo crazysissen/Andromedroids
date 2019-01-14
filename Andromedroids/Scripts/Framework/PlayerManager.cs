@@ -43,11 +43,14 @@ namespace Andromedroids
         public int Shield { get; private set; }
 
         public string PlayerName { get; private set; }
+        public string MenuName { get; private set; }
         public string ShortName { get; private set; }
         public string PlayerDescription { get; private set; }
         public Color PlayerHullColor { get; private set; }
         public Color PlayerDecalColor { get; private set; }
         public Texture2D PlayerTexture { get; private set; }
+
+        public bool OutOfBounds => Math.Abs(Player.Position.X) > _gameController.MapRadius || Math.Abs(Player.Position.Y) > _gameController.MapRadius;
 
         Weapon.StartType[] _weaponTypes;
         private Weapon[] _weapons;
@@ -94,7 +97,7 @@ namespace Andromedroids
         /// <summary>
         /// FRAMEWORK. NOT to be used in the AI. Will register as a cheat.
         /// </summary>
-        public void FW_Setup(HashKey key)
+        public void FW_Setup(HashKey key, string menuName)
         {
             if (key.Validate("ShipPlayer.Setup"))
             {
@@ -103,6 +106,7 @@ namespace Andromedroids
                 _weaponTypes = config.Weapons;
 
                 PlayerName = config.Name.Length <= 16 ? config.Name : config.Name.Substring(0, 16);
+                MenuName = menuName;
                 ShortName = config.ShortName.Length <= 5 ? config.ShortName : config.ShortName.Substring(0, 5);
                 PlayerDescription = config.Description;
                 PlayerHullColor = config.HullColor;
@@ -447,7 +451,7 @@ namespace Andromedroids
             return new PlayerInfo();
         }
 
-        public void FW_End(HashKey key)
+        public void FW_End(HashKey key, bool winner)
         {
             if (key.Validate("PlayerManager.End"))
             {

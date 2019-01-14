@@ -35,10 +35,16 @@ namespace Andromedroids
 
         private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private GUI.Collection quickStart, mainMenu;
+        private PlayerList playerList;
+        private bool tournamentListActive, playerListActive;
 
         // Ingame variables
 
         GameController gameController;
+
+        // Tournament
+
+
 
         public MainController(XNAController systemController)
         {
@@ -55,7 +61,6 @@ namespace Andromedroids
             }
 
             key = new HashKey();
-
             r = new Random();
             cheat = new CheatDetection();
             stateManager = new StateManager(GameState.QuickMenu, 0);
@@ -74,6 +79,8 @@ namespace Andromedroids
 
             MediaPlayer.IsRepeating = true;
 
+            Sound.Initialize();
+
             // Importing all players using the ShipAI attribute
             Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
 
@@ -89,7 +96,7 @@ namespace Andromedroids
 
                         PlayerManager current = new PlayerManager(key, controller, (ShipPlayer)Activator.CreateInstance(type));
 
-                        current.FW_Setup(key);
+                        current.FW_Setup(key, menuName);
 
                         allPlayers.Add(current);
 
@@ -102,8 +109,6 @@ namespace Andromedroids
             }
 
             #region GUI Initialization
-
-
 
             Point res = XNAController.DisplayResolution;
             Point origin = (res.ToVector2() * 0.5f).ToPoint();
@@ -148,7 +153,9 @@ namespace Andromedroids
             exitButton.AddEffect(ContentController.Get<SoundEffect>("MenuBlipExit"));
             exitButton.OnClick += Exit;
 
-            mainMenu.Add(title, startButton, tournamentButton, exitButton);
+            playerList = new PlayerList();
+
+            mainMenu.Add(title, startButton, tournamentButton, exitButton, playerList.Collection);
             
             // Finalization
 
@@ -305,8 +312,6 @@ namespace Andromedroids
         {
             Debug.WriteLine("Main Menu");
 
-            quickStart.Active = false;
-
             TransitionState(GameState.MainMenu, 0.35f, ActivateMenu);
         }
 
@@ -314,12 +319,16 @@ namespace Andromedroids
         {
             Sound.PlaySong(menuMusic);
 
+            quickStart.Active = false;
             mainMenu.Active = true;
         }
 
         private void Start()
         {
-            TransitionState(GameState.StartGame, 1f, ActivateStart);
+            if (playerList != null)
+            {
+                playerList.Initialize(allPlayers.ToArray(), new Point(40, 40), 2);
+            }
         }
 
         private void StartConfirm()
@@ -334,7 +343,15 @@ namespace Andromedroids
 
         private void Tournament()
         {
-            TransitionState(GameState.Tournament, 0.35f, ActivateTournament);
+            if (playerList != null)
+            {
+                playerList.Initialize(allPlayers.ToArray(), new Point(XNAController.DisplayResolution.X - 394, 40), 0);
+            }
+        }
+
+        private void TournamentConfirm()
+        {
+
         }
 
         private void ActivateTournament()
@@ -345,8 +362,11 @@ namespace Andromedroids
         private void Exit()
         {
             transitionOverlay.Texture = ContentController.Get<Texture2D>("Bye");
+
             (mainMenu.Members[3] as GUI.Button).layer = new Layer(MainLayer.AbsoluteTop, 10);
+
             Sound.StopSong();
+
             TransitionState(GameState.Exit, 1, ActivateExit);
         }
 
@@ -364,6 +384,11 @@ namespace Andromedroids
             transitionCountdown = 0;
 
             stateManager.SetGameState(GameState.Transition, 0);
+        }
+
+        public void GameEnd(int winner)
+        {
+
         }
 
         private void CreatePlayerList()

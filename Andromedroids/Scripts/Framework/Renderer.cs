@@ -41,7 +41,7 @@ namespace Andromedroids
                 return;
             }
 
-            graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.Transparent, 0, 0);
+            graphics.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.Transparent, 0, 0 );
             //System.Diagnostics.Debug.WriteLine(Camera.ScreenToWorldPosition(Mouse.GetState().Position.ToVector2()));
 
             //camera.Scale -= (0.2f * (float)gameTime.ElapsedGameTime.TotalSeconds);

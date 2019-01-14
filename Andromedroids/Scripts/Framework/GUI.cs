@@ -25,8 +25,12 @@ namespace Andromedroids
             DrawContainer(key, this, spriteBatch, mouse, keyboard, deltaTime, Point.Zero);
         }
 
-        public static void DrawContainer(HashKey key, GUIContainer container, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime, Point additiveOrigin)
+        public static IGUIMember[] DrawContainer(HashKey key, GUIContainer container, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime, Point additiveOrigin, bool drawThis = false)
         {
+            // Recursive method to retrieve all 
+
+            List<IGUIMember> newMembers = new List<IGUIMember>();
+
             foreach (IGUIMember member in container.Members)
             {
                 if (member is GUIContainer)
@@ -43,11 +47,13 @@ namespace Andromedroids
                         continue;
                     }
 
-                    DrawContainer(key, (member as GUIContainer), spriteBatch, mouse, keyboard, deltaTime, additiveOrigin + (member as GUIContainer).Origin);
+                    newMembers.AddRange(DrawContainer(key, (member as GUIContainer), spriteBatch, mouse, keyboard, deltaTime, additiveOrigin + (member as GUIContainer).Origin));
                 }
 
-                member.Draw(spriteBatch, mouse, keyboard, deltaTime);
+                newMembers.Add(member);
             }
+
+            return newMembers.ToArray();
         }
 
         public static GUI operator +(GUI gui, IGUIMember member)
@@ -88,7 +94,11 @@ namespace Andromedroids
 
         public virtual void Remove(IGUIMember member)
         {
-            Members.Remove(member);
+            if (Members.Contains(member))
+            {
+                Members.Remove(member);
+                Members.TrimExcess();
+            }
         }
 
         public virtual Point Origin { get; set; }

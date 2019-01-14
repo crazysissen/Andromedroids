@@ -26,12 +26,16 @@ namespace Andromedroids
         const int
             CAMERAOFFSET = -10;
 
+        readonly Color grayColor = new Color(Color.Gray, 0.5f);
+
+        public float MapRadius { get; private set; }
+
         private XNAController controller;
         private MainController mainController;
 
-        private int frameCount, state, timeScale = 1;
+        private int frameCount, state, timeScale = 1, loser;
         private bool running;
-        private float startCountdown;
+        private float countdown;
         private PlayerManager[] players;
         private List<Bullet>[] 
             bullets = new List<Bullet>[] { new List<Bullet>(), new List<Bullet>() },
@@ -54,6 +58,9 @@ namespace Andromedroids
         private Renderer.SpriteScreen[] nameConnectors;
         private Renderer.Text[] nameTexts;
 
+        // Misc
+        private Renderer.SpriteScreen gameOverSplash, gameOverGray;
+
         public GameController(HashKey key)
         {
             if (key.Validate("GameController Constructor"))
@@ -64,7 +71,7 @@ namespace Andromedroids
 
         public void Initialize(XNAController controller, Renderer.SpriteScreen backgroundRenderer, SoundEffect song, Texture2D background, PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance, bool quickStart)
         {
-            TournamentBracket bracket = new TournamentBracket(new PlayerManager[] { players [0], players[0], players[0], players[0], players[0], players[0], players[0], players[0], players[0], players[0]} );
+            MapRadius = wuRadius;
 
             this.song = song;
             this.controller = controller;
@@ -127,6 +134,18 @@ namespace Andromedroids
             }
 
             DrawAbbreviations(RendererController.Camera);
+
+            Rectangle screenCover = new Rectangle(0, res.Y / 2 - res.X / 2, res.X, res.X);
+
+            gameOverSplash = new Renderer.SpriteScreen(new Layer(MainLayer.Overlay, 10), ContentController.Get<Texture2D>("GameOver"), new Rectangle(res.X / 2 - 185, res.Y / 2 - 30, 370, 60))
+            {
+                Automatic = false
+            };
+
+            gameOverGray = new Renderer.SpriteScreen(new Layer(MainLayer.Overlay, 9), ContentController.Get<Texture2D>("Square"), new Rectangle(0, res.Y / 2 - res.X / 2, res.X, res.X), grayColor)
+            { 
+                Automatic = false
+            };
         }
 
         public void StartGame()
@@ -155,39 +174,40 @@ namespace Andromedroids
             float targetScale = 1 / (ZOOMMULTIPLIER * DEFAULTZOOM * playerDistance);
 
             Camera camera = RendererController.GetCamera(key);
-            camera.Position = averagePosition + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));
 
             switch (state)
             {
                 // Intro screen
                 case 0:
 
-                    startCountdown += deltaTimeScaled;
+                    camera.Position = averagePosition + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));
+
+                    countdown += deltaTimeScaled;
 
                     DrawAbbreviations(RendererController.Camera);
 
-                    if (startCountdown < INTROTIME)
+                    if (countdown < INTROTIME)
                     {
-                        float progress = startCountdown / INTROTIME;
+                        float progress = countdown / INTROTIME;
 
 
                     }
 
-                    if (startCountdown > INTROTIME && startCountdown < INTROTIME + ZOOMOUTTIME)
+                    if (countdown > INTROTIME && countdown < INTROTIME + ZOOMOUTTIME)
                     {
                         float
-                            progress = (startCountdown - INTROTIME) / ZOOMOUTTIME,
+                            progress = (countdown - INTROTIME) / ZOOMOUTTIME,
                             sine = MathA.SineA(progress);
 
                         camera.Scale = STARTZOOM.Lerp(targetScale, progress); 
                     }
 
-                    if (startCountdown > INTROTIME + ZOOMOUTTIME && startCountdown < INTROTIME + ZOOMOUTTIME + EXTRAWAITTIME)
+                    if (countdown > INTROTIME + ZOOMOUTTIME && countdown < INTROTIME + ZOOMOUTTIME + EXTRAWAITTIME)
                     {
                         camera.Scale = targetScale; 
                     }
 
-                    if (startCountdown > INTROTIME + ZOOMOUTTIME + EXTRAWAITTIME)
+                    if (countdown > INTROTIME + ZOOMOUTTIME + EXTRAWAITTIME)
                     {
                         camera.Scale = targetScale;
                         state = 1;
@@ -202,6 +222,8 @@ namespace Andromedroids
 
                     if (running)
                     {
+                        camera.Position = averagePosition + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));
+
                         ++frameCount;
 
                         DrawAbbreviations(RendererController.Camera);
@@ -225,15 +247,35 @@ namespace Andromedroids
                             removeQueue[i].Clear();
                         }
 
-                        foreach (PlayerManager player in players)
+                        bool endFlag = false;
+
+                        for (int i = 0; i < players.Length; i++)
                         {
-                            if (player.Health <= 0 || player)
+                            if (players[i].Health <= 0 || players[i].OutOfBounds)
                             {
-                                player.FW_End(key);
+                                players[i].FW_End(key, false);
+                                players[(i + 1) % 2].FW_End(key, true);
+
+                                loser = i;
+
+                                endFlag = true;
+
                                 break;
                             }
 
-                            player.FW_Update(key, gameTime, deltaTimeScaled, bullets);
+                            players[i].FW_Update(key, gameTime, deltaTimeScaled, bullets);
+                        }
+
+                        if (endFlag)
+                        {
+                            Sound.PlayEffect(SFX.ExplodeLong);
+                            Sound.PlayEffect(SFX.ExplodeEcho);
+
+                            gameOverGray.Automatic = true;
+                            gameOverSplash.Automatic = true;
+
+                            state = 4;
+                            countdown = 0;
                         }
                     }
 
@@ -245,6 +287,41 @@ namespace Andromedroids
 
                 // Disqualification
                 case 3:
+                    break;
+
+                // Game Over
+                case 4:
+
+                    float
+                        zoomTime = 0.5f,
+                        followTime = 2.0f,
+                        cameraScale = 1.0f;
+
+                    countdown += deltaTimeScaled;
+
+                    if (countdown < zoomTime)
+                    {
+                        float progress = countdown / zoomTime;
+
+                        camera.Position = Vector2.Lerp(averagePosition, players[loser].Player.Position, progress) + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));
+                        camera.Scale = targetScale.Lerp(cameraScale, progress);
+
+                        gameOverGray.Color = Color.Lerp(Color.Transparent, grayColor, progress);
+                        gameOverSplash.Color = new Color(Color.White, progress);
+                    }
+                    else if (countdown < zoomTime + followTime)
+                    {
+                        camera.Position = players[loser].Player.Position + camera.ScreenToWorldSize(new Vector2(CAMERAOFFSET, 0));
+                        camera.Scale = cameraScale;
+
+                        gameOverGray.Color = grayColor;
+                        gameOverSplash.Color = Color.White;
+                    }
+                    else
+                    {
+                        controller.GameEnd((loser + 1) % 2);
+                    }
+
                     break;
             }
         }

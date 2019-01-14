@@ -11,7 +11,7 @@ namespace Andromedroids
     {
         EscapeLong, EscapeShort,
         ExplodeEcho, ExplodeLong, ExplodeMedium, ExplodeShort,
-        HitHard, HitImpact, HitMedium,
+        HitHard, HitImpact, HitMedium, HitShort,
         MenuBlipBack, MenuBlipClick, MenuBlipExit, MenuBlipNeutral, MenuBlipStart,
         PickupLong, PickupLong2,
         PowerupElectric, PowerupMedium, PowerupMinor, PowerupWobble,
@@ -37,13 +37,16 @@ namespace Andromedroids
             }
 
             _initialized = true;
-            _effects = ContentController.GetCollection<SoundEffect>("SFX");
+            _effects = ContentController.GetCollection<SoundEffect>("Sound/SFX");
         }
 
         public static void PlayEffect(SFX sfx)
         {
             _effects[(int)sfx].Play(SFXVolume, 0.0f, 0.0f);
         }
+
+        public static SoundEffect Effect(SFX sfx) 
+            => _effects[(int)sfx];
 
         public static void SetSFXVolume(HashKey key, float volume)
         {
@@ -53,7 +56,7 @@ namespace Andromedroids
 
                 foreach (SoundEffectInstance effect in _playingEffects)
                 {
-
+                    effect.Volume = volume;
                 }
             }
         }

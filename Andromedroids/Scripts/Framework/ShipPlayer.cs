@@ -15,7 +15,7 @@ namespace Andromedroids
 
         public ShipAI(string menuName, bool quickstart = false)
         {
-            MenuName = menuName;
+            MenuName = menuName.Length > 12 ? menuName.Substring(0, 12) : menuName;
             Quickstart = quickstart;
         }
     }

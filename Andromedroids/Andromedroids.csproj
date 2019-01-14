@@ -67,6 +67,11 @@
     <Compile Include="Scripts\Framework\Sound.cs" />
     <Compile Include="Scripts\Framework\StatWindow.cs" />
     <Compile Include="Scripts\Framework\TournamentBracket.cs" />
+    <Compile Include="Scripts\Players\MyPlayer - Copy %282%29.cs" />
+    <Compile Include="Scripts\Players\MyPlayer - Copy %283%29.cs" />
+    <Compile Include="Scripts\Players\MyPlayer - Copy %284%29.cs" />
+    <Compile Include="Scripts\Players\MyPlayer - Copy %285%29.cs" />
+    <Compile Include="Scripts\Players\MyPlayer - Copy.cs" />
     <Compile Include="Scripts\Players\MyPlayer.cs" />
     <Compile Include="Scripts\Framework\Renderer.cs" />
     <Compile Include="Scripts\Framework\ShipPlayer.cs" />
