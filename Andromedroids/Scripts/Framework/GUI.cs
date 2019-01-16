@@ -22,10 +22,10 @@ namespace Andromedroids
 
         public void Draw(HashKey key, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime)
         {
-            DrawContainer(key, this, spriteBatch, mouse, keyboard, deltaTime, Point.Zero);
+            GetMembers(key, this, mouse, keyboard, deltaTime, Point.Zero);
         }
 
-        public static IGUIMember[] DrawContainer(HashKey key, GUIContainer container, SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime, Point additiveOrigin, bool drawThis = false)
+        public static IGUIMember[] GetMembers(HashKey key, GUIContainer container, MouseState mouse, KeyboardState keyboard, float deltaTime, Point additiveOrigin, bool drawThis = false)
         {
             // Recursive method to retrieve all 
 
@@ -47,10 +47,11 @@ namespace Andromedroids
                         continue;
                     }
 
-                    newMembers.AddRange(DrawContainer(key, (member as GUIContainer), spriteBatch, mouse, keyboard, deltaTime, additiveOrigin + (member as GUIContainer).Origin));
+                    newMembers.AddRange(GetMembers(key, (member as GUIContainer), mouse, keyboard, deltaTime, additiveOrigin + (member as GUIContainer).Origin));
                 }
 
                 newMembers.Add(member);
+
             }
 
             return newMembers.ToArray();
@@ -131,6 +132,8 @@ namespace Andromedroids
 
     public interface IGUIMember
     {
+        Layer Layer { get; }
+
         void Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float deltaTime);
     }
 
@@ -152,32 +155,22 @@ namespace Andromedroids
     {
         public class Collection : GUIContainer, IGUIMember
         {
+            Layer IGUIMember.Layer => Layer.Default;
+
             void IGUIMember.Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float unscaledDeltaTime) { }
         }
 
         public class MaskedCollection : GUIContainerMasked, IGUIMember
         {
+            Layer IGUIMember.Layer => Layer.Default;
+
             void IGUIMember.Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float unscaledDeltaTime) { }
-        }
-
-        public class Panel : GUIContainer, IGUIMember
-        {
-            void IGUIMember.Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float unscaledDeltaTime)
-            {
-
-            }
-        }
-
-        public class ScrollView : GUIContainer, IGUIMember
-        {
-            void IGUIMember.Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float unscaledDeltaTime)
-            {
-
-            }
         }
 
         public class Button : IGUIMember
         {
+            Layer IGUIMember.Layer => Layer;
+
             const float
                 DEFAULTTRANSITIONTIME = 0.04f;
 
@@ -200,7 +193,7 @@ namespace Andromedroids
             public Texture2D[] TextureSwitch { get; private set; }
             public Color[] ColorSwitch { get; private set; }
 
-            public Layer layer;
+            public Layer Layer { get; set; }
 
             private Func<float, float> _transition;
             private Color _textBaseColor;
@@ -331,7 +324,7 @@ namespace Andromedroids
 
                 foreach (TA textureAlpha in textures)
                 {
-                    spriteBatch.Draw(textureAlpha.texture, Transform, null, new Color(color, textureAlpha.a), 0, Vector2.Zero, SpriteEffects.None, layer.LayerDepth);
+                    spriteBatch.Draw(textureAlpha.texture, Transform, null, new Color(color, textureAlpha.a), 0, Vector2.Zero, SpriteEffects.None, Layer.LayerDepth);
                 }
 
                 if (!pressed)
@@ -458,7 +451,7 @@ namespace Andromedroids
             public void AddText(string text, int fontSize, bool centered, Color baseColor, SpriteFont font)
             {
                 Text = new Renderer.Text(
-                    layer, font, text, fontSize, 0,
+                    Layer, font, text, fontSize, 0,
                     centered ? new Vector2((Transform.Left + Transform.Right) * 0.5f, (Transform.Top + Transform.Bottom) * 0.5f) : new Vector2(Transform.Left + 2, (Transform.Top + Transform.Bottom) * 0.5f),
                     centered ? new Vector2(0.5f, 0.5f) : new Vector2(0, 0.5f),
                     baseColor);

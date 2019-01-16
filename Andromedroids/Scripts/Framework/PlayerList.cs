@@ -68,7 +68,7 @@ namespace Andromedroids
 
                 Buttons[i] = new GUI.Button(new Rectangle(slotOrigin, new Point(48, 48)), checkBoxFalse);
                 Buttons[i].AddEffect(Sound.Effect(SFX.MenuBlipNeutral));
-                Buttons[i].layer = new Layer(MainLayer.GUI, 0);
+                Buttons[i].Layer = new Layer(MainLayer.GUI, 0);
                 Buttons[i].OnClick += instances[i].Activate;
 
                 Labels[i] = new Renderer.SpriteScreen(new Layer(MainLayer.GUI, 0), buttonBlank, new Rectangle(slotOrigin.X + 54, slotOrigin.Y, 300, 48));

@@ -34,7 +34,7 @@ namespace Andromedroids
             };
         }
 
-        public static void Draw(HashKey key, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime)
+        public static void Draw(HashKey key, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTime)
         {
             if (!key.Validate("RendererController.Draw"))
             {
@@ -53,17 +53,34 @@ namespace Andromedroids
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.NonPremultiplied, SamplerState.PointWrap);
 
-            renderers = renderers.OrderBy(o => o.Layer.LayerDepth).ToList();
+            IGUIMember[] guiMembers = GUI.GetMembers(key, GUI, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds, Point.Zero);
 
-            foreach (Renderer renderer in renderers)
+            List<object> allDrawables = new List<object>();
+
+            allDrawables.AddRange(renderers);
+            allDrawables.AddRange(guiMembers);
+
+            // Order drawables by layer using 
+
+            allDrawables = allDrawables.OrderBy(o => (o is IGUIMember) ? (o as IGUIMember).Layer.LayerDepth : (o as Renderer).Layer.LayerDepth).ToList();
+
+            foreach (object drawable in allDrawables)
             {
-                if (renderer.Automatic)
+                if (drawable is Renderer)
                 {
-                    renderer.Draw(spriteBatch, Camera, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                    Renderer renderer = (drawable as Renderer);
+
+                    if (renderer.Automatic)
+                    {
+                        renderer.Draw(spriteBatch, Camera, deltaTime);
+                    }
+
+                    continue;
                 }
+
+                (drawable as IGUIMember).Draw(spriteBatch, mouseState, keyboardState, deltaTime);
             }
 
-            GUI.Draw(key, spriteBatch, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds);
 
             spriteBatch.End();
 
@@ -107,7 +124,7 @@ namespace Andromedroids
                 spriteBatch.End();
 
                 spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, s2, null, null);
-                GUI.DrawContainer(key, item.mask, spriteBatch, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds, item.origin);
+                IGUIMember[] maskGuiMembers = GUI.GetMembers(key, item.mask, mouseState, keyboardState, deltaTime, item.origin);
                 spriteBatch.End();
 
                 ++iterations;
@@ -246,6 +263,8 @@ namespace Andromedroids
 
         public class SpriteScreen : Renderer, IGUIMember
         {
+            Layer IGUIMember.Layer => Layer;
+
             /// <summary>The texture of the object</summary>
             public virtual Texture2D Texture { get; set; }
 

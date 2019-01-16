@@ -274,7 +274,7 @@ namespace Andromedroids
 
         public void Draw(XNAController systemController, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, GameTime gameTime, float deltaTimeScaled)
         {
-            RendererController.Draw(key, graphics, spriteBatch, gameTime);
+            RendererController.Draw(key, graphics, spriteBatch, gameTime, deltaTimeScaled);
         }
 
         void StartGame(PlayerManager[] players, float wuRadius, float wuMinDistance, float wuMaxDistance, bool quickStart)
@@ -363,7 +363,7 @@ namespace Andromedroids
         {
             transitionOverlay.Texture = ContentController.Get<Texture2D>("Bye");
 
-            (mainMenu.Members[3] as GUI.Button).layer = new Layer(MainLayer.AbsoluteTop, 10);
+            (mainMenu.Members[3] as GUI.Button).Layer = new Layer(MainLayer.AbsoluteTop, 10);
 
             Sound.StopSong();
 
