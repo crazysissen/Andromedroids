@@ -23,6 +23,7 @@ namespace Andromedroids
 
         private Action transitionStart;
         private float transitionCountdown, transitionTarget;
+        private bool returnToTournament;
         private SoundEffect menuMusic, ingameMusic, tournamentMusic, targetSong;
         private StateManager stateManager;
         private Random r;
@@ -293,13 +294,14 @@ namespace Andromedroids
         {
             Debug.WriteLine("Quickstart");
 
-            quickStart.Active = false;
 
-            TransitionState(GameState.InGame, 1f, ActivateQuickstart);
+            TransitionState(GameState.InGame, 1.0f, ActivateQuickstart);
         }
 
         private void ActivateQuickstart()
         {
+            quickStart.Active = false;
+
             PlayerManager[] players = new PlayerManager[2]
             {
                 quickstartPlayers[0].New(key),
@@ -346,13 +348,22 @@ namespace Andromedroids
             if (startPlayers.Count == 2)
             {
                 transitionStartPlayers = startPlayers.ToArray();
-                TransitionState(GameState.InGame, 1, ActivateStart);
+                TransitionState(GameState.InGame, 1.0f, ActivateStart);
             }
         }
 
         private void ActivateStart()
         {
-            
+            mainMenu.Active = false;
+            playerList.Collection.Active = false;
+
+            PlayerManager[] players = new PlayerManager[2]
+            {
+                transitionStartPlayers[0].New(key),
+                transitionStartPlayers[1].New(key)
+            };
+
+            StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE, true);
         }
 
         private void Tournament()
@@ -394,7 +405,7 @@ namespace Andromedroids
 
         }
 
-        public void StartTournamentMatch(int p1, int p2)
+        public void StartTournamentMatch(PlayerManager p1, PlayerManager p2)
         {
 
         }
@@ -433,7 +444,25 @@ namespace Andromedroids
 
         public void GameEnd(int winner)
         {
+            TransitionState(returnToTournament ? GameState.Tournament : GameState.MainMenu, 1, GameEndActivate);
+        }
 
+        public void GameEndActivate()
+        {
+            gameController.EndGame();
+
+            Sound.PlaySong(menuMusic);
+
+            gameController = null;
+
+            if (returnToTournament)
+            {
+                tournament.Collection.Active = true;
+            }
+            else
+            {
+                mainMenu.Active = true;
+            }
         }
 
         private void CreatePlayerList()
@@ -444,12 +473,6 @@ namespace Andromedroids
         private void DestroyPlayerList()
         {
 
-        }
-
-        struct MenuPlayer
-        {
-            public string menuName;
-            public Type playerType;
         }
     }
 }

@@ -34,11 +34,12 @@ namespace Andromedroids
         private TournamentBracket _bracket;
         private List<Renderer.SpriteScreen> playerLabels, links;
         private List<Renderer.Text> playerTexts;
-        private Action<int, int> _startMatchAction;
+        private Action<PlayerManager, PlayerManager> _startMatchAction;
         private Action<PlayerManager> _endTournamentAction;
         private float _countdown;
+        private bool _playedSound;
 
-        public Tournament(PlayerManager[] players, Action<int, int> startMatchAction, Action<PlayerManager> endTournamentAction)
+        public Tournament(PlayerManager[] players, Action<PlayerManager, PlayerManager> startMatchAction, Action<PlayerManager> endTournamentAction)
         {
             _countdown = 0;
             _startMatchAction = startMatchAction;
@@ -64,13 +65,22 @@ namespace Andromedroids
 
         public void MatchOver(int winner)
         {
+            _countdown = 3.0f;
+            _bracket.GetNextMatch(winner);
+            _playedSound = false;
 
+            Sound.PlayEffect(SFX.Success);
         }
 
         // Expected to simply stop updating while a match is started
-        public void Update()
+        public void Update(MainController controller, float deltaTime)
         {
+            _countdown -= deltaTime; 
 
+            if (_countdown <= 0)
+            { 
+                controller.StartTournamentMatch(_bracket.Bracket[_bracket.CurrentMatch.row][_bracket.CurrentMatch.slot].player, _bracket.Bracket[_bracket.CurrentMatch.row][_bracket.CurrentMatch.slot + 1].player);
+            }
         }
 
         private void GenerateRenderers()

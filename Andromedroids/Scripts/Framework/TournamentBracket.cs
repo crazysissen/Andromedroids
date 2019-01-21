@@ -10,15 +10,15 @@ namespace Andromedroids
     {
         public Slot[][] Bracket { get; private set; }
         public Queue<Match> Matches { get; private set; }
+        public Match CurrentMatch { get; private set; }
 
-        public Match GetNextMatch(out PlayerManager p1, out PlayerManager p2)
+        public void GetNextMatch(int winner)
         {
-            Match match = Matches.Dequeue();
+            Bracket[CurrentMatch.row][CurrentMatch.slot].state = winner == 0 ? Slot.State.Won : Slot.State.Lost;
+            Bracket[CurrentMatch.row][CurrentMatch.slot + 1].state = winner == 1 ? Slot.State.Won : Slot.State.Lost;
+            Bracket[CurrentMatch.row - 1][CurrentMatch.slot / 2] = new Slot(Bracket[CurrentMatch.row][CurrentMatch.slot + winner].player);
 
-            p1 = Bracket[match.row + 1][match.slot * 2].player;
-            p2 = Bracket[match.row + 1][match.slot * 2 + 1].player;
-
-            return match;
+            CurrentMatch = Matches.Dequeue();
         }
 
         public TournamentBracket(PlayerManager[] players)
@@ -102,6 +102,8 @@ namespace Andromedroids
                     }
                 }
             }
+
+            CurrentMatch = Matches.Dequeue();
         }
 
         public struct Match

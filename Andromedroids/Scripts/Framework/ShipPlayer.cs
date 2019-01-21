@@ -27,8 +27,6 @@ namespace Andromedroids
         public const float
             HITRADIUS = 1.0f;
 
-        public PlayerManager Manager { get; private set; }
-
         public int OpponentHealth { get; set; }
         public float OpponentShield { get; set; }
         public Vector2 OpponentPosition { get; set; }

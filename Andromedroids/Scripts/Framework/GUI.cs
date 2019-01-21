@@ -139,14 +139,16 @@ namespace Andromedroids
     public struct Mask
     {
         public Texture2D MaskTexture { get; set; }
+        public Color Color { get; set; }
         public Rectangle Rectangle { get; set; }
         public bool RenderOutside { get; set; }
 
-        public Mask(Texture2D mask, Rectangle rectangle, bool renderOutside)
+        public Mask(Texture2D mask, Rectangle rectangle, Color color, bool renderOutside)
         {
             MaskTexture = mask;
             Rectangle = rectangle;
             RenderOutside = renderOutside;
+            Color = color;
         }
     }
 

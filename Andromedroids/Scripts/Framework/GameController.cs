@@ -43,6 +43,7 @@ namespace Andromedroids
         private Random r;
         private HashKey key;
         private System.Timers.Timer timer;
+        private PlayerManager.TimeStats latestTimeStats;
         private Texture2D[] speedControlSprites;
         private SoundEffect song;
         private GUI.Button speedControl;
@@ -50,8 +51,9 @@ namespace Andromedroids
         private Renderer.Sprite backgroundSquare;
         private Renderer.SpriteScreen background;
 
+        private GUI.Collection inGameGui;
+
         // Stat windows
-        private GUI.Collection[] playerStatWindows;
         private StatWindow[] statWindows;
  
         // Small names
@@ -82,6 +84,9 @@ namespace Andromedroids
 
             Point res = XNAController.DisplayResolution;
 
+            inGameGui = new GUI.Collection();
+            RendererController.GUI.Add(inGameGui);
+
             // Play song
             Sound.PlaySong(song);
 
@@ -106,8 +111,8 @@ namespace Andromedroids
 
             // Setup the speed control switch
             speedControl = new GUI.Button(new Rectangle(res.X - 130, 20, 110, 14), speedControlSprites[1], GUI.Button.DefaultColors(), GUI.Button.Transition.Switch, 0.05f);
-            speedControl.OnClick += SpeedControlClick; 
-            RendererController.GUI += speedControl;
+            speedControl.OnClick += SpeedControlClick;
+            inGameGui.Add(speedControl);
 
             // Setup the out-of-bounds box
             backgroundSquare = new Renderer.Sprite(Layer.Default, ContentController.Get<Texture2D>("SquareMask"), Vector2.Zero, Camera.WORLDUNITPIXELS * Vector2.One * wuRadius, new Color(0, 0, 15, 100), 0, new Vector2(0.5f, 0.5f), SpriteEffects.None);
@@ -122,6 +127,8 @@ namespace Andromedroids
 
                 // Initialize stat windows
                 statWindows[i] = new StatWindow(key, players[i], players[i].PlayerDecalColor, controller, new Rectangle(30, 30 + 440 * i, 240, 430));
+
+                inGameGui.Add(statWindows[i].Collection);
             }
 
             // Set up the text connectors
@@ -131,6 +138,8 @@ namespace Andromedroids
             {
                 nameConnectors[i] = new Renderer.SpriteScreen(new Layer(MainLayer.GUI, 0), ContentController.Get<Texture2D>("Square"), new Rectangle());
                 nameTexts[i] = new Renderer.Text(new Layer(MainLayer.GUI, 0), ContentController.Get<SpriteFont>("Thin"), players[i].ShortName, 20, 0, Vector2.Zero);
+
+                inGameGui.Add(nameConnectors[i], nameTexts[i]);
             }
 
             DrawAbbreviations(RendererController.Camera);
@@ -146,12 +155,15 @@ namespace Andromedroids
             { 
                 Active = false
             };
+
+            inGameGui.Add(gameOverGray, gameOverSplash);
         }
 
         public void StartGame()
         {
             timer = new System.Timers.Timer(500);
             timer.Elapsed += UpdateStatistics;
+            timer.Start();
 
             foreach (PlayerManager player in players)
             {
@@ -161,7 +173,19 @@ namespace Andromedroids
 
         public void EndGame()
         {
+            backgroundSquare.Destroy();
 
+            statWindows[0].Collection.Active = false;
+            statWindows[1].Collection.Active = false;
+
+            players[0].FW_Destroy(key);
+            players[1].FW_Destroy(key);
+
+            bullets = null;
+
+            inGameGui.Active = false;
+
+            timer.Dispose();
         }
 
         public void Update(MainController controller, XNAController game, GameTime gameTime, float deltaTimeScaled)
@@ -247,8 +271,6 @@ namespace Andromedroids
                             removeQueue[i].Clear();
                         }
 
-                        bool endFlag = false;
-
                         for (int i = 0; i < players.Length; i++)
                         {
                             if (players[i].Health <= 0 || players[i].OutOfBounds)
@@ -258,24 +280,28 @@ namespace Andromedroids
 
                                 loser = i;
 
-                                endFlag = true;
+                                this.controller.SetSpeed(key, TimeScale.Normal);
+
+                                Sound.PlayEffect(SFX.ExplodeLong);
+                                Sound.PlayEffect(SFX.ExplodeEcho);
+
+                                gameOverGray.Active = true;
+                                gameOverSplash.Active = true;
+
+                                nameTexts[0].Active = false;
+                                nameTexts[1].Active = false;
+                                nameConnectors[0].Active = false;
+                                nameConnectors[1].Active = false;
+
+                                state = 4;
+                                countdown = 0;
 
                                 break;
                             }
 
                             players[i].FW_Update(key, gameTime, deltaTimeScaled, bullets);
-                        }
 
-                        if (endFlag)
-                        {
-                            Sound.PlayEffect(SFX.ExplodeLong);
-                            Sound.PlayEffect(SFX.ExplodeEcho);
-
-                            gameOverGray.Active = true;
-                            gameOverSplash.Active = true;
-
-                            state = 4;
-                            countdown = 0;
+                            statWindows[i].Update();
                         }
                     }
 
@@ -294,8 +320,8 @@ namespace Andromedroids
 
                     float
                         zoomTime = 0.5f,
-                        followTime = 2.0f,
-                        cameraScale = 1.0f;
+                        followTime = 1.0f,
+                        cameraScale = 2.0f;
 
                     countdown += deltaTimeScaled;
 
@@ -358,7 +384,10 @@ namespace Andromedroids
 
         private void UpdateStatistics(object sender, System.Timers.ElapsedEventArgs e)
         {
-            PlayerManager.TimeStats[] times = { players[0].FW_GetElapsedTimes(key, false), players[1].FW_GetElapsedTimes(key, false) };
+            for (int i = 0; i < 2; ++i)
+            {
+                players[i].FW_UpdateElapsedTimes(key);
+            }
         }
     }
 }

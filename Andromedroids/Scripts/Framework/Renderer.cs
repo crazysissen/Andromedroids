@@ -57,7 +57,7 @@ namespace Andromedroids
 
             List<object> allDrawables = new List<object>();
 
-            allDrawables.AddRange(renderers.TakeWhile(o => o.AutomaticDraw));
+            allDrawables.AddRange(renderers.Where(o => o.AutomaticDraw));
             allDrawables.AddRange(guiMembers);
 
             // Order drawables by layer using 
@@ -118,14 +118,29 @@ namespace Andromedroids
                 Texture2D transparent = new Texture2D(graphics.GraphicsDevice, 1, 1);
                 transparent.SetData(new Color[] { Color.Transparent });
 
-                spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, s1, null, a);
-                spriteBatch.Draw(transparent, new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Color.White);
-                spriteBatch.Draw(item.mask.Mask.MaskTexture, new Rectangle(item.mask.Mask.Rectangle.Location + item.mask.Origin, item.mask.Mask.Rectangle.Size), Color.White);
+                // First render a 0-opaque back buffer and the according render mask
+
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, s1, null, a);
+
+                spriteBatch.Draw(transparent, new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Color.Black);
+                spriteBatch.Draw(item.mask.Mask.MaskTexture, new Rectangle(item.mask.Mask.Rectangle.Location + item.mask.Origin, item.mask.Mask.Rectangle.Size), item.mask.Mask.Color);
+
                 spriteBatch.End();
 
-                spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, s2, null, null);
-                IGUIMember[] maskGuiMembers = GUI.GetMembers(key, item.mask, mouseState, keyboardState, deltaTime, item.origin);
+                // Render every consequential member in order of layer within the mask
+
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, s2, null, null);
+
+                IGUIMember[] maskGuiMembers = GUI.GetMembers(key, item.mask, mouseState, keyboardState, deltaTime, item.origin).OrderBy(o => o.Layer.LayerDepth).ToArray();
+
+                foreach (IGUIMember guiMember in maskGuiMembers)
+                {
+                    guiMember.Draw(spriteBatch, mouseState, keyboardState, deltaTime);
+                }
+
                 spriteBatch.End();
+
+                // Iterating the layer number so that multiple simultanious masks are possible
 
                 ++iterations;
             }
@@ -302,7 +317,7 @@ namespace Andromedroids
 
             public override void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime)
             {
-                spriteBatch.Draw(Texture, Transform, null, Color, Rotation * DEGTORAD, Origin, Effects, Layer.LayerDepth);
+                spriteBatch.Draw(Texture, Transform, null, Color, Rotation, Origin, Effects, Layer.LayerDepth);
             }
 
             void IGUIMember.Draw(SpriteBatch spriteBatch, MouseState mouse, KeyboardState keyboard, float unscaledDeltaTime)

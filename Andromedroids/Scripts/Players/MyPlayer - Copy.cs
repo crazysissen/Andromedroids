@@ -34,8 +34,8 @@ namespace Andromedroids
                 ShortName   = "EMPTY",                  // Short name abbreviation, 5 letters
                 Description = "Description!",           // Ship description
                 Class       = ShipClass.Scorpion,       // Ship class
-                HullColor   = new Color(0xFF_CF_CF_CF), // Ship hull color
-                DecalColor  = new Color(0xFF_FF_FF_FF), // Ship decal color (also the team color)
+                HullColor   = new Color(0xFF_00_00_CF), // Ship hull color
+                DecalColor  = new Color(0xFF_00_00_FF), // Ship decal color (also the team color)
                 Weapons     = new Weapon.StartType[]    // 6 weapons, overflow will be ignored, lack will be filled with [Gatling Gun].
                 {
                     Weapon.StartType.GatlingGun,

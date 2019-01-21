@@ -11,7 +11,7 @@ namespace Andromedroids
 {
     public sealed class PlayerManager
     {
-        const float
+        public const float
             BYTETOFLOAT = 1.0f / 255,
             HITDURATION = 0.35f,
             MAXACCELERATION = 0.8f,
@@ -21,9 +21,9 @@ namespace Andromedroids
             DECELLERATIONPERSPEED = MAXACCELERATION / MAXSPEED,
             SHIELDREGENMULTUIPLIER = 1.0f / 5; // 1/X where X is how much power is needed for each shield/second
 
-        const int
+        public const int
             HITALPHA = 150,
-            MAXPOWER = 160,
+            MAXPOWER = 16,
             MAXSHIELD = 100,
             STARTSHIELD = 50,
             STARTHEALTH = 100,
@@ -49,6 +49,7 @@ namespace Andromedroids
         public Color PlayerHullColor { get; private set; }
         public Color PlayerDecalColor { get; private set; }
         public Texture2D PlayerTexture { get; private set; }
+        public TimeStats LatestTimeStats { get; private set; }
 
         public bool OutOfBounds => Math.Abs(Player.Position.X) > _gameController.MapRadius || Math.Abs(Player.Position.Y) > _gameController.MapRadius;
 
@@ -61,13 +62,14 @@ namespace Andromedroids
         private Thread _playerThread, _startThread;
         private Renderer.Sprite _renderer, _shieldRenderer;
         private HashKey _key;
+        private Stopwatch _currentTimePeriodStopwatch;
         private float _shieldRegenProgress, _hitEffectCooldown;
-        private double _currentTimePeriod, _totalTime;
-        private int _currentFrameCount, _totalFrameCount;
+        private double _currentTimePeriod, _totalUpdateTime, _totalTime;
+        private int _currentFrameCount, _currentSkippedFrameCount, _totalSkippedFrames, _totalFrameCount;
         private bool _inUpdate, _run, _firstFrame;
         private float[] _remainingPowerupTime;
 
-        private Configuration latestConfig = Configuration.Empty;
+        public Configuration LatestConfig { get; private set; } = Configuration.Empty;
 
         public PlayerManager(HashKey key, XNAController controller, ShipPlayer player)
         {
@@ -147,11 +149,12 @@ namespace Andromedroids
                 _totalFrameCount = 0;
                 _currentFrameCount = 0;
                 _currentTimePeriod = 0;
-                _totalTime = 0;
+                _totalUpdateTime = 0;
                 _remainingPowerupTime = new float[4];
                 _firstFrame = true;
                 _renderer = new Renderer.Sprite(Layer.Default, PlayerTexture, position, Vector2.One, Color.White, rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None);
                 _shieldRenderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), ContentController.Get<Texture2D>("HitRadius"), Player.Position, Vector2.One * (Camera.WORLDUNITPIXELS / 300.0f), shieldMinColor, 0);
+                _currentTimePeriodStopwatch = new Stopwatch();
 
                 _startThread = new Thread(Player.Initialize)
                 {
@@ -171,6 +174,7 @@ namespace Andromedroids
                 _playerThread.Start();
 
                 _run = true;
+                _currentTimePeriodStopwatch.Start();
 
                 return _playerThread.ManagedThreadId;
             }
@@ -190,7 +194,7 @@ namespace Andromedroids
                 #region Execution
 
                 // There should be no config for frame 1
-                Configuration config = _firstFrame ? Configuration.Empty : latestConfig;
+                Configuration config = _firstFrame ? Configuration.Empty : LatestConfig;
 
                 // - Reading and verifying the values returned
 
@@ -248,18 +252,23 @@ namespace Andromedroids
                     effectiveRotation -= (float)Math.PI * 2; 
                 }
 
+                if (effectiveRotation < -Math.PI)
+                {
+                    effectiveRotation += (float)Math.PI * 2;
+                }
+
                 float possibleRotation = MAXROTATIONSPEED * (config.rotationPower / MAXROTATIONPOWER) * scaledDeltaTime;
                 float newRotation = Player.Rotation + effectiveRotation.Clamp(-possibleRotation, possibleRotation);
 
-                if (newRotation > Math.PI * 2)
-                {
-                    newRotation -= (float)Math.PI * 2;
-                }
+                //if (newRotation > Math.PI * 2)
+                //{
+                //    newRotation -= (float)Math.PI * 2;
+                //}
                 
-                if (newRotation < 0)
-                {
-                    newRotation += (float)Math.PI * 2;
-                }
+                //if (newRotation < 0)
+                //{
+                //    newRotation += (float)Math.PI * 2;
+                //}
 
                 Player.SetRotation(key, newRotation);
 
@@ -313,7 +322,7 @@ namespace Andromedroids
 
                 if (_inUpdate)
                 {
-
+                    ++_currentSkippedFrameCount;
 
                     return;
                 }
@@ -410,23 +419,32 @@ namespace Andromedroids
                 {
                     returnValue = new TimeStats()
                     {
-                        time = _totalTime + _currentTimePeriod,
+                        time = _totalUpdateTime + _currentTimePeriod,
                         frameCount = _totalFrameCount + _currentFrameCount
                     };
                 }
                 else
                 {
-                    _totalTime += _currentTimePeriod;
+                    double currentTimePeriod = _currentTimePeriodStopwatch.Elapsed.TotalMilliseconds;
+
+                    _totalUpdateTime += _currentTimePeriod;
                     _totalFrameCount += _currentFrameCount;
+                    _totalTime += currentTimePeriod;
+                    _totalSkippedFrames += _currentSkippedFrameCount;
 
                     returnValue = new TimeStats()
                     {
+                        totalTime = currentTimePeriod,
                         time = _currentTimePeriod,
-                        frameCount = _currentFrameCount
+                        frameCount = _currentFrameCount,
+                        skippedFrames = _currentSkippedFrameCount
                     };
+
+                    _currentTimePeriodStopwatch.Restart();
 
                     _currentTimePeriod = 0.0;
                     _currentFrameCount = 0;
+                    _currentSkippedFrameCount = 0;
                 }
 
                 return returnValue;
@@ -435,13 +453,21 @@ namespace Andromedroids
             return new TimeStats();
         }
 
+        public void FW_UpdateElapsedTimes(HashKey key)
+        {
+            if (key.Validate("PlayerManager.UpdateElapsedTimes"))
+            {
+                LatestTimeStats = FW_GetElapsedTimes(key, false);
+            }
+        }
+
         public PlayerInfo FW_GetPlayerInfo(HashKey key)
         {
             if (key.Validate("Player.GetPlayerInfo [Player:" + ShortName + "]"))
             {
                 return new PlayerInfo()
                 {
-                    config = latestConfig,
+                    config = LatestConfig,
                     time = FW_GetElapsedTimes(key, false),
                     health = Health,
                     shield = Shield
@@ -459,6 +485,20 @@ namespace Andromedroids
             }
         }
 
+        public void FW_Destroy(HashKey key)
+        {
+            if (key.Validate("PlayerManager.Destroy"))
+            {
+                foreach (Weapon weapon in _weapons)
+                {
+                    weapon.Renderer.Destroy();
+                }
+
+                _renderer.Destroy();
+                _shieldRenderer.Destroy();
+            }
+        }
+
         public void FW_Damage(HashKey key, int damage)
         {
             if (key.Validate("PlayerManager.Damage [Player:" + ShortName + "]"))
@@ -472,6 +512,7 @@ namespace Andromedroids
                 }
 
                 Health -= damage - Shield;
+                Shield = 0;
             }
         }
 
@@ -490,7 +531,15 @@ namespace Andromedroids
                 _inUpdate = true;
                 speedTimer.Restart();
 
-                latestConfig = Player.Update(GetTime(deltaTimeTimer));
+                Configuration config = Player.Update(GetTime(deltaTimeTimer));
+                config.targetRotation += (float)Math.PI * 0.5f;
+
+                if (config.targetRotation > Math.PI)
+                {
+                    config.targetRotation -= (float)Math.PI * 2;
+                }
+
+                LatestConfig = config;
 
                 ++_currentFrameCount;
 
@@ -610,8 +659,8 @@ namespace Andromedroids
 
         public struct TimeStats
         {
-            public double time;
-            public int frameCount;
+            public double time, totalTime;
+            public int frameCount, skippedFrames;
         }
 
         public struct PlayerInfo

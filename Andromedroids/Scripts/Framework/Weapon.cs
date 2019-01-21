@@ -23,6 +23,7 @@ namespace Andromedroids
         private static Texture2D[] readyWeaponTextures, cooldownWeaponTextures;
         private static Random r;
 
+        public Renderer.Sprite Renderer { get; set; }
 
         public WeaponType WeaponType { get; }
 
@@ -40,7 +41,6 @@ namespace Andromedroids
         public float MaxCooldown { get; private set; }
 
         private GameController _controller;
-        private Renderer.Sprite _renderer;
         private HashKey _key;
         private int _team;
         private float _powerMaximumDivisor;
@@ -99,7 +99,7 @@ namespace Andromedroids
                     }
                 }
 
-                _renderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), cooldownWeaponTextures[(int)type], Vector2.Zero, Vector2.One, Color.White, 0, new Vector2(0, 1), SpriteEffects.None);
+                Renderer = new Renderer.Sprite(new Layer(MainLayer.Main, -1), cooldownWeaponTextures[(int)type], Vector2.Zero, Vector2.One, Color.White, 0, new Vector2(0, 1), SpriteEffects.None);
                 SetPosition(shipPosition, slot, rotation);
             }
         }
@@ -145,8 +145,8 @@ namespace Andromedroids
 
 
             Vector2 targetPosition = (weaponOffsets[slot].ToVector2() / Camera.WORLDUNITPIXELS * 2).Rotate(rotation);
-            _renderer.Position = shipPosition + targetPosition;
-            _renderer.Rotation = ForwardRotation(rotation, slot);
+            Renderer.Position = shipPosition + targetPosition;
+            Renderer.Rotation = ForwardRotation(rotation, slot);
         }
 
         public float ForwardRotation(float rotation, int slot) 
