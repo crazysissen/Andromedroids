@@ -139,12 +139,12 @@ namespace Andromedroids
 
             gameOverSplash = new Renderer.SpriteScreen(new Layer(MainLayer.Overlay, 10), ContentController.Get<Texture2D>("GameOver"), new Rectangle(res.X / 2 - 185, res.Y / 2 - 30, 370, 60))
             {
-                Automatic = false
+                Active = false
             };
 
             gameOverGray = new Renderer.SpriteScreen(new Layer(MainLayer.Overlay, 9), ContentController.Get<Texture2D>("Square"), new Rectangle(0, res.Y / 2 - res.X / 2, res.X, res.X), grayColor)
             { 
-                Automatic = false
+                Active = false
             };
         }
 
@@ -271,8 +271,8 @@ namespace Andromedroids
                             Sound.PlayEffect(SFX.ExplodeLong);
                             Sound.PlayEffect(SFX.ExplodeEcho);
 
-                            gameOverGray.Automatic = true;
-                            gameOverSplash.Automatic = true;
+                            gameOverGray.Active = true;
+                            gameOverSplash.Active = true;
 
                             state = 4;
                             countdown = 0;

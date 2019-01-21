@@ -109,22 +109,27 @@ namespace Andromedroids
             public int row, slot;
         }
 
-        public struct Slot
+        public class Slot
         {
+            public enum State
+            {
+                Empty, Waiting, Lost, Won
+            }
+
             public PlayerManager player;
-            public bool loser;
+            public State state;
 
             public Slot(PlayerManager player)
             {
                 if (player != null)
                 {
                     this.player = player;
-                    loser = false;
+                    state = State.Waiting;
                     return;
                 }
 
                 this.player = null;
-                loser = true;
+                state = State.Empty;
             }
         }
     }

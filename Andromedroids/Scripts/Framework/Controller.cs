@@ -36,6 +36,7 @@ namespace Andromedroids
         private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private GUI.Collection quickStart, mainMenu;
         private PlayerList playerList;
+        PlayerManager[] transitionStartPlayers;
         private bool tournamentListActive, playerListActive;
 
         // Ingame variables
@@ -44,7 +45,7 @@ namespace Andromedroids
 
         // Tournament
 
-
+        Tournament tournament;
 
         public MainController(XNAController systemController)
         {
@@ -142,7 +143,7 @@ namespace Andromedroids
             Renderer.SpriteScreen title = new Renderer.SpriteScreen(Layer.Default, ContentController.Get<Texture2D>("Icon"), new Rectangle(-348 + origin.X, -270 + origin.Y, 696, 120));
 
             GUI.Button startButton = new GUI.Button(new Rectangle(-78 + origin.X, -50 + origin.Y, 155, 80), ContentController.Get<Texture2D>("ButtonStart"));
-            startButton.AddEffect(ContentController.Get<SoundEffect>("MenuBlipStart"));
+            startButton.AddEffect(ContentController.Get<SoundEffect>("MenuBlipClick"));
             startButton.OnClick += Start;
 
             GUI.Button tournamentButton = new GUI.Button(new Rectangle(-163 + origin.X, 70 + origin.Y, 325, 80), ContentController.Get<Texture2D>("ButtonTournament"));
@@ -327,34 +328,78 @@ namespace Andromedroids
         {
             if (playerList != null)
             {
-                playerList.Initialize(allPlayers.ToArray(), new Point(40, 40), 2);
+                playerList.Initialize(allPlayers.ToArray(), new Point(40, 40), 2, StartConfirm);
             }
         }
 
         private void StartConfirm()
         {
+            List<PlayerManager> startPlayers = new List<PlayerManager>();
+            for (int i = 0; i < playerList.Values.Length; i++)
+            {
+                if (playerList.Values[i])
+                {
+                    startPlayers.Add(playerList.Players[i]);
+                }
+            }
 
+            if (startPlayers.Count == 2)
+            {
+                transitionStartPlayers = startPlayers.ToArray();
+                TransitionState(GameState.InGame, 1, ActivateStart);
+            }
         }
 
         private void ActivateStart()
         {
-
+            
         }
 
         private void Tournament()
         {
             if (playerList != null)
             {
-                playerList.Initialize(allPlayers.ToArray(), new Point(XNAController.DisplayResolution.X - 394, 40), 0);
+                playerList.Initialize(allPlayers.ToArray(), new Point(XNAController.DisplayResolution.X - 394, 40), 0, TournamentConfirm);
             }
         }
 
         private void TournamentConfirm()
         {
+            List<PlayerManager> tournamentPlayers = new List<PlayerManager>();
+            for (int i = 0; i < playerList.Values.Length; i++)
+            {
+                if (playerList.Values[i])
+                {
+                    tournamentPlayers.Add(playerList.Players[i]);
+                }
+            }
 
+            if (tournamentPlayers.Count >= 3)
+            {
+                transitionStartPlayers = tournamentPlayers.ToArray();
+                TransitionState(GameState.Tournament, 1, ActivateTournament);
+            }
         }
 
         private void ActivateTournament()
+        {
+            tournament = new Tournament(transitionStartPlayers, StartTournamentMatch, TournamentWin);
+
+            mainMenu.Active = false;
+            tournament.Collection.Active = true;
+        }
+
+        private void ProceedTournament()
+        {
+
+        }
+
+        public void StartTournamentMatch(int p1, int p2)
+        {
+
+        }
+
+        public void TournamentWin(PlayerManager winner)
         {
 
         }

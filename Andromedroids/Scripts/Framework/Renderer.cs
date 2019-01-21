@@ -51,13 +51,13 @@ namespace Andromedroids
 
             renderMasks.Clear();
 
-            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.NonPremultiplied, SamplerState.PointWrap);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointWrap);
 
             IGUIMember[] guiMembers = GUI.GetMembers(key, GUI, mouseState, keyboardState, (float)gameTime.ElapsedGameTime.TotalSeconds, Point.Zero);
 
             List<object> allDrawables = new List<object>();
 
-            allDrawables.AddRange(renderers);
+            allDrawables.AddRange(renderers.TakeWhile(o => o.AutomaticDraw));
             allDrawables.AddRange(guiMembers);
 
             // Order drawables by layer using 
@@ -70,7 +70,7 @@ namespace Andromedroids
                 {
                     Renderer renderer = (drawable as Renderer);
 
-                    if (renderer.Automatic)
+                    if (renderer.Active)
                     {
                         renderer.Draw(spriteBatch, Camera, deltaTime);
                     }
@@ -180,7 +180,8 @@ namespace Andromedroids
             FONTSIZEMULTIPLIER = 1.0f / 12.0f;
 
         /// <summary>Whether or not the object should be drawn automatically</summary>
-        public virtual bool Automatic { get; set; } = true;
+        public virtual bool Active { get; set; } = true;
+        public virtual bool AutomaticDraw { get; set; } = true;
 
         public abstract void Draw(SpriteBatch spriteBatch, Camera camera, float deltaTime);
 
@@ -608,7 +609,7 @@ namespace Andromedroids
             MAINCOUNT = 5;
 
         public const float
-            LAYERINTERVAL = float.Epsilon,
+            LAYERINTERVAL = 1.0f / (MAINCOUNT * 10000),
             MAININTERVAL = 1.0f / (MAINCOUNT + 1),
             HALFINTERVAL = MAININTERVAL * 0.5f;
 

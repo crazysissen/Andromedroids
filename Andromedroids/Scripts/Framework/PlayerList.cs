@@ -11,21 +11,26 @@ namespace Andromedroids
 {
     class PlayerList
     {
-        static Texture2D 
+        public static Texture2D 
             checkBoxTrue,
             checkBoxFalse,
-            buttonBlank;
+            buttonBlank,
+            buttonStart;
 
-        static SpriteFont
+        public static SpriteFont
             nameFont = ContentController.Get<SpriteFont>("Bold");
 
         public GUI.Collection Collection { get; private set; }
+
+        public GUI.Button StartButton { get; private set; }
+        public Action StartAction { get; set; }
 
         public GUI.Button[] Buttons { get; private set; }
         public Renderer.SpriteScreen[] Labels { get; private set; }
         public Renderer.Text[] Names { get; private set; }
 
         public bool[] Values { get; private set; }
+        public PlayerManager[] Players { get; private set; }
 
         public int SelectedCount => Values.Count(o => o == true);
 
@@ -33,23 +38,39 @@ namespace Andromedroids
         List<int> _selectionOrder;
         Point _origin;
         int _maxChoices;
+        bool _initialized;
 
         public PlayerList()
         {
             Collection = new GUI.Collection();
         }
 
-        public void Initialize(PlayerManager[] players, Point origin, int maxChoices)
+        public void Initialize(PlayerManager[] players, Point origin, int maxChoices, Action startAction)
         {
             if (checkBoxTrue == null)
             {
                 checkBoxTrue = ContentController.Get<Texture2D>("CheckBoxTrue");
                 checkBoxFalse = ContentController.Get<Texture2D>("CheckBoxFalse");
                 buttonBlank = ContentController.Get<Texture2D>("ButtonBlank");
+                buttonStart = ContentController.Get<Texture2D>("ButtonStart");
             }
+
+            if (_initialized)
+            {
+                for (int i = 0; i < Values.Length; ++i)
+                {
+                    Labels[i].Destroy();
+                    Names[i].Destroy();
+                }
+            }
+
 
             Collection.Members.Clear();
 
+            StartAction = startAction;
+            Players = players;
+
+            _initialized = true;
             _origin = origin;
             _maxChoices = maxChoices;
             _selectionOrder = new List<int>();
@@ -77,6 +98,12 @@ namespace Andromedroids
 
                 Collection.Add(Buttons[i], Labels[i], Names[i]);
             }
+
+            StartButton = new GUI.Button(new Rectangle(origin.X + 130, origin.Y + 64 * players.Length + 12, 93, 48), buttonStart);
+            StartButton.AddEffect(Sound.Effect(SFX.MenuBlipStart));
+            StartButton.OnClick += ButtonStart;
+
+            Collection.Add(StartButton);
         }
 
         void ButtonClick(int index)
@@ -116,6 +143,11 @@ namespace Andromedroids
             Buttons[index].Texture = checkBoxTrue; 
 
             Values[index] = true;
+        }
+
+        void ButtonStart()
+        {
+            StartAction.Invoke();
         }
 
         private struct MethodInstance

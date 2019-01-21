@@ -459,7 +459,7 @@ namespace Andromedroids
             }
         }
 
-        public void Damage(HashKey key, int damage)
+        public void FW_Damage(HashKey key, int damage)
         {
             if (key.Validate("PlayerManager.Damage [Player:" + ShortName + "]"))
             {

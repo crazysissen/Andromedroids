@@ -51,7 +51,6 @@ namespace Andromedroids
                 }
 
                 newMembers.Add(member);
-
             }
 
             return newMembers.ToArray();
@@ -84,12 +83,12 @@ namespace Andromedroids
         {
             foreach (IGUIMember member in members)
             {
+                Members.Add(member);
+
                 if (member is Renderer)
                 {
-                    (member as Renderer).Automatic = false;
+                    (member as Renderer).AutomaticDraw = false;
                 }
-
-                Members.Add(member);
             }
         }
 

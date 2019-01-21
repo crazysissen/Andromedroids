@@ -84,7 +84,7 @@ namespace Andromedroids
 
         public void Trigger(PlayerManager targetPlayer)
         {
-            targetPlayer.Damage(key, Damage);
+            targetPlayer.FW_Damage(key, Damage);
             renderer.Destroy();
             controller.RemoveBullet(this, (targetPlayer.PlayerNumber + 1) % 2);
         }
