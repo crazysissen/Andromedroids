@@ -22,8 +22,9 @@ namespace Andromedroids
         private static CheatDetection cheat;
 
         private Action transitionStart;
+        private int currentWinner;
         private float transitionCountdown, transitionTarget;
-        private bool returnToTournament;
+        private bool returnToTournament, updatingTournament;
         private SoundEffect menuMusic, ingameMusic, tournamentMusic, targetSong;
         private StateManager stateManager;
         private Random r;
@@ -37,7 +38,7 @@ namespace Andromedroids
         private Renderer.SpriteScreen menuBackground, transitionOverlay;
         private GUI.Collection quickStart, mainMenu;
         private PlayerList playerList;
-        PlayerManager[] transitionStartPlayers;
+        private PlayerManager[] transitionStartPlayers;
         private bool tournamentListActive, playerListActive;
 
         // Ingame variables
@@ -202,7 +203,10 @@ namespace Andromedroids
 
                 case GameState.Tournament:
 
-
+                    if (updatingTournament)
+                    {
+                        tournament.Update(this, deltaTimeScaled);
+                    }
 
                     break;
 
@@ -363,7 +367,7 @@ namespace Andromedroids
                 transitionStartPlayers[1].New(key)
             };
 
-            StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE, true);
+            StartGame(players, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE, false);
         }
 
         private void Tournament()
@@ -398,6 +402,7 @@ namespace Andromedroids
 
             mainMenu.Active = false;
             tournament.Collection.Active = true;
+            updatingTournament = true;
         }
 
         private void ProceedTournament()
@@ -407,7 +412,19 @@ namespace Andromedroids
 
         public void StartTournamentMatch(PlayerManager p1, PlayerManager p2)
         {
+            returnToTournament = true;
 
+            transitionStartPlayers = new PlayerManager[] { p1.New(key), p2.New(key) };
+
+            TransitionState(GameState.InGame, 0.5f, ActivateTournamentMatch);
+
+            updatingTournament = false;
+        }
+
+        private void ActivateTournamentMatch()
+        {
+            tournament.Collection.Active = false;
+            StartGame(transitionStartPlayers, MAPRADIUS, MINSPAWNDISTANCE, MAXSPAWNDISTANCE, false);
         }
 
         public void TournamentWin(PlayerManager winner)
@@ -444,24 +461,46 @@ namespace Andromedroids
 
         public void GameEnd(int winner)
         {
-            TransitionState(returnToTournament ? GameState.Tournament : GameState.MainMenu, 1, GameEndActivate);
+            currentWinner = winner;
+
+            if (returnToTournament)
+            {
+                if (tournament.Bracket.Matches.Count == 0)
+                {
+                    TransitionState(GameState.End, 1, TournamentEndActivate);
+
+                    return;
+                }
+
+                TransitionState(GameState.Tournament, 1, GameEndActivate);
+
+                return;
+            }
+
+            TransitionState(GameState.MainMenu, 1, GameEndActivate);
+        }
+
+        private void TournamentEndActivate()
+        {
+            gameController.EndGame();
+            gameController = null;
         }
 
         public void GameEndActivate()
         {
             gameController.EndGame();
-
-            Sound.PlaySong(menuMusic);
-
             gameController = null;
 
             if (returnToTournament)
             {
                 tournament.Collection.Active = true;
+                tournament.MatchOver(currentWinner);
+                updatingTournament = true;
             }
             else
             {
                 mainMenu.Active = true;
+                playerList.Collection.Active = true;
             }
         }
 

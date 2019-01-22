@@ -21,7 +21,8 @@ namespace Andromedroids
         readonly Color
             wonColor = new Color(255, 255, 255, 180),
             inactiveColor = new Color(255, 255, 255, 180),
-            deadColor = new Color(120, 120, 120, 180),
+            deadColor = new Color(120, 40, 40, 120),
+            blinkColor = new Color(180, 180, 150, 255),
             textColor = new Color(255, 150, 0, 255),
             neutralLinkColor = new Color(180, 180, 180, 255),
             wonLinkColor = new Color(255, 150, 0, 255),
@@ -29,9 +30,11 @@ namespace Andromedroids
 
         public GUI.Collection Collection { get; private set; }
         public PlayerManager[] Players { get; private set; }
+        public TournamentBracket Bracket { get; private set; }
 
         private Texture2D _square = ContentController.Get<Texture2D>("Square");
-        private TournamentBracket _bracket;
+        private Renderer.SpriteScreen[] _blinkSprites;
+        private Renderer.SpriteScreen[][] _sortedRenderers;
         private List<Renderer.SpriteScreen> playerLabels, links;
         private List<Renderer.Text> playerTexts;
         private Action<PlayerManager, PlayerManager> _startMatchAction;
@@ -41,15 +44,17 @@ namespace Andromedroids
 
         public Tournament(PlayerManager[] players, Action<PlayerManager, PlayerManager> startMatchAction, Action<PlayerManager> endTournamentAction)
         {
-            _countdown = 0;
+            _countdown = 3.0f;
             _startMatchAction = startMatchAction;
             _endTournamentAction = endTournamentAction;
+
+            _blinkSprites = new Renderer.SpriteScreen[2];
 
             Players = new PlayerManager[players.Length];
             Random r = new Random();
             List<PlayerManager> dList = new List<PlayerManager>(players);
 
-            for (int i = 0; i < players.Length; i++)
+            for (int i = 0; i < players.Length; ++i)
             {
                 int slot = r.Next(dList.Count);
 
@@ -58,28 +63,58 @@ namespace Andromedroids
             }
 
             // Generating the actual tournament bracket is completely automatic
-            _bracket = new TournamentBracket(Players);
+            Bracket = new TournamentBracket(Players);
 
             GenerateRenderers();
+
+            _blinkSprites = new Renderer.SpriteScreen[]
+            {
+                _sortedRenderers[Bracket.CurrentMatch.row][Bracket.CurrentMatch.slot],
+                _sortedRenderers[Bracket.CurrentMatch.row][Bracket.CurrentMatch.slot + 1]
+            };
         }
 
         public void MatchOver(int winner)
         {
             _countdown = 3.0f;
-            _bracket.GetNextMatch(winner);
+            Bracket.GetNextMatch(winner);
             _playedSound = false;
 
-            Sound.PlayEffect(SFX.Success);
+            GenerateRenderers();
+
+            _blinkSprites = new Renderer.SpriteScreen[]
+            {
+                _sortedRenderers[Bracket.CurrentMatch.row][Bracket.CurrentMatch.slot],
+                _sortedRenderers[Bracket.CurrentMatch.row][Bracket.CurrentMatch.slot + 1]
+            };
         }
 
         // Expected to simply stop updating while a match is started
         public void Update(MainController controller, float deltaTime)
         {
-            _countdown -= deltaTime; 
+            _countdown -= deltaTime;
 
             if (_countdown <= 0)
-            { 
-                controller.StartTournamentMatch(_bracket.Bracket[_bracket.CurrentMatch.row][_bracket.CurrentMatch.slot].player, _bracket.Bracket[_bracket.CurrentMatch.row][_bracket.CurrentMatch.slot + 1].player);
+            {
+                controller.StartTournamentMatch(Bracket.Bracket[Bracket.CurrentMatch.row][Bracket.CurrentMatch.slot].player, Bracket.Bracket[Bracket.CurrentMatch.row][Bracket.CurrentMatch.slot + 1].player);
+
+                _blinkSprites[0].Color = Color.White;
+                _blinkSprites[1].Color = Color.White;
+
+                return;
+            }
+
+            if (_countdown <= 1)
+            {
+                if (!_playedSound)
+                {
+                    Sound.PlayEffect(SFX.Success);
+                }
+
+                bool blink = (int)(_countdown * 20) % 2 == 0;
+
+                _blinkSprites[0].Color = blink ? blinkColor : Color.White;
+                _blinkSprites[1].Color = blink ? blinkColor : Color.White;
             }
         }
 
@@ -109,11 +144,13 @@ namespace Andromedroids
                 RendererController.GUI.Add(Collection);
             }
 
+            _sortedRenderers = new Renderer.SpriteScreen[Bracket.Bracket.Length][];
+
             Point res = XNAController.DisplayResolution;
 
             int 
-                layers = _bracket.Bracket.Length, 
-                maxHeightLayers = _bracket.Bracket[layers - 1].Length,
+                layers = Bracket.Bracket.Length, 
+                maxHeightLayers = Bracket.Bracket[layers - 1].Length,
 
                 horizontalSpace = MAXIMUMHORIZONTALSPACING,
                 verticalSpace = MAXIMUMVERTICALSPACING,
@@ -143,9 +180,11 @@ namespace Andromedroids
             {
                 Point previousPosition = new Point();
 
-                for (int j = 0; j < _bracket.Bracket[i].Length; ++j)
+                _sortedRenderers[i] = new Renderer.SpriteScreen[Bracket.Bracket[i].Length];
+
+                for (int j = 0; j < Bracket.Bracket[i].Length; ++j)
                 {
-                    TournamentBracket.Slot slot = _bracket.Bracket[i][j];
+                    TournamentBracket.Slot slot = Bracket.Bracket[i][j];
 
                     Point position = new Point(currentX, i == layers - 1 ? (startY + (PLAYERHEIGHT + verticalSpace) * j) : ((positions[i + 1, j * 2].Y + positions[i + 1, j * 2 + 1].Y) / 2));
 
@@ -156,6 +195,8 @@ namespace Andromedroids
                         Color[] colors = { inactiveColor, Color.White, deadColor, wonColor };
 
                         Renderer.SpriteScreen label = new Renderer.SpriteScreen(Layer.Default, PlayerList.buttonBlank, new Rectangle(position, new Point(PLAYERWIDTH, PLAYERHEIGHT)), slot == null ? inactiveColor : colors[(int)slot.state]);
+
+                        _sortedRenderers[i][j] = label;
 
                         if (slot.player != null)
                         {
@@ -171,7 +212,7 @@ namespace Andromedroids
                             Color[] linkColors = { neutralLinkColor, neutralLinkColor, deadLinkColor, wonLinkColor };
 
                             Renderer.SpriteScreen tLink, tBridge, bLink, bBridge, connector;
-                            TournamentBracket.Slot firstSlot = _bracket.Bracket[i][j - 1];
+                            TournamentBracket.Slot firstSlot = Bracket.Bracket[i][j - 1];
 
                             Point averageMiddle = new Point(position.X + PLAYERWIDTH, (position.Y + previousPosition.Y + PLAYERHEIGHT) / 2);
 

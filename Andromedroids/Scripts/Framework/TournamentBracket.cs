@@ -92,14 +92,16 @@ namespace Andromedroids
 
             Matches = new Queue<Match>();
 
-            for (int i = lPower - 1; i >= 0; --i)
+            for (int i = lPower; i >= 0; --i)
             {
-                for (int j = 0; j < Bracket[i].Length; ++j)
+                for (int j = 0; j < Bracket[i].Length; j += 2)
                 {
-                    if (Bracket[i][j].player == null)
+                    if (Bracket[i][j] == null)
                     {
-                        Matches.Enqueue(new Match() { row = i, slot = j });
+                        continue;
                     }
+
+                    Matches.Enqueue(new Match() { row = i, slot = j });
                 }
             }
 

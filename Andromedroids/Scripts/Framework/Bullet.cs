@@ -85,8 +85,13 @@ namespace Andromedroids
         public void Trigger(PlayerManager targetPlayer)
         {
             targetPlayer.FW_Damage(key, Damage);
-            renderer.Destroy();
             controller.RemoveBullet(this, (targetPlayer.PlayerNumber + 1) % 2);
+            Dispose(); 
+        }
+
+        public void Dispose()
+        {
+            renderer.Destroy();
         }
 
         bool IsColliding(ShipPlayer player)

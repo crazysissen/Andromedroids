@@ -77,14 +77,14 @@ namespace Andromedroids
             Configuration config = new Configuration() // If the total power returned exceeds [base.TotalPower], all settings will default to zero.
             {
                 thrusterPower = 0f,
-                shieldPower = 50.0f,
-                rotationPower = 6.0f,
+                shieldPower = 0.0f,
+                rotationPower = 4.0f,
 
                 targetRotation = Position.RotationTowards(RendererController.Camera.ScreenToWorldPosition(In.MousePosition.ToVector2())),
 
                 weaponPower = new float[]
                 {
-                    6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f
+                    4.0f, 4.0f, 4.0f, 0.0f, 0.0f, 0.0f
                 },
 
                 weaponFire = new bool[]

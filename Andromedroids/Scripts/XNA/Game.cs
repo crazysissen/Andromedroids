@@ -9,7 +9,7 @@ namespace Andromedroids
     /// </summary>
     public enum TimeScale: int 
     {
-        Normal, Fast, Fastest, Slow
+        Slow, Normal, Fast, Fastest
     }
 
     public class XNAController : Game

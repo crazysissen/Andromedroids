@@ -181,6 +181,14 @@ namespace Andromedroids
             players[0].FW_Destroy(key);
             players[1].FW_Destroy(key);
 
+            foreach (List<Bullet> currentBullets in bullets)
+            {
+                foreach (Bullet bullet in currentBullets)
+                {
+                    bullet.Dispose();
+                }
+            }
+
             bullets = null;
 
             inGameGui.Active = false;
@@ -321,7 +329,7 @@ namespace Andromedroids
                     float
                         zoomTime = 0.5f,
                         followTime = 1.0f,
-                        cameraScale = 2.0f;
+                        cameraScale = 0.5f;
 
                     countdown += deltaTimeScaled;
 
