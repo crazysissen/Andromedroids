@@ -353,7 +353,7 @@ namespace Andromedroids
                     }
                     else
                     {
-                        controller.GameEnd((loser + 1) % 2);
+                        controller.GameEnd((loser + 1) % 2, players[(loser + 1) % 2]);
                     }
 
                     break;

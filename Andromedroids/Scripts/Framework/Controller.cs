@@ -30,6 +30,7 @@ namespace Andromedroids
         private Random r;
         private HashKey key;
         private List<PlayerManager> allPlayers, quickstartPlayers;
+        private PlayerManager latestWinner;
         private XNAController controller;
         private GameState endState;
 
@@ -48,6 +49,10 @@ namespace Andromedroids
         // Tournament
 
         Tournament tournament;
+
+        // Win
+
+        GUI.Collection winCollection;
 
         public MainController(XNAController systemController)
         {
@@ -459,59 +464,69 @@ namespace Andromedroids
             stateManager.SetGameState(GameState.Transition, 0);
         }
 
-        public void GameEnd(int winner)
+        public void GameEnd(int winner, PlayerManager winnerManager)
         {
             currentWinner = winner;
 
+            latestWinner = winnerManager;
+
             if (returnToTournament)
             {
-                if (tournament.Bracket.Matches.Count == 0)
+                if (tournament.Bracket.Matches.Count == 1)
                 {
                     TransitionState(GameState.End, 1, TournamentEndActivate);
 
                     return;
                 }
 
-                TransitionState(GameState.Tournament, 1, GameEndActivate);
+                TransitionState(GameState.Tournament, 1, MatchEndActivate);
 
                 return;
             }
 
-            TransitionState(GameState.MainMenu, 1, GameEndActivate);
+            TransitionState(GameState.MainMenu, 1, MatchEndActivate);
         }
 
         private void TournamentEndActivate()
         {
+            Sound.PlaySong(menuMusic);
+
             gameController.EndGame();
             gameController = null;
+
+            Point res = XNAController.DisplayResolution;
+
+            menuBackground.Texture = ContentController.Get<Texture2D>("Space1");
+
+            Renderer.SpriteScreen win = new Renderer.SpriteScreen(new Layer(MainLayer.GUI, 11), ContentController.Get<Texture2D>("Win"), new Rectangle(40, res.Y / 2 - 140, 530, 120));
+            Renderer.Text name = new Renderer.Text(new Layer(MainLayer.GUI, 11), ContentController.Get<SpriteFont>("Bold"), latestWinner.PlayerName, 90, 0, new Vector2(40, res.Y / 2), new Color(255, 150, 0, 255));
+
+            winCollection = new GUI.Collection();
+
+            winCollection.Add(win, name);
+            RendererController.GUI.Add(winCollection);
         }
 
-        public void GameEndActivate()
+        public void MatchEndActivate()
         {
             gameController.EndGame();
             gameController = null;
 
             if (returnToTournament)
             {
+                Sound.PlaySong(tournamentMusic);
+
                 tournament.Collection.Active = true;
                 tournament.MatchOver(currentWinner);
                 updatingTournament = true;
             }
             else
             {
+                Sound.PlaySong(menuMusic);
+
                 mainMenu.Active = true;
                 playerList.Collection.Active = true;
             }
-        }
-
-        private void CreatePlayerList()
-        {
-
-        }
-
-        private void DestroyPlayerList()
-        {
-
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Andromedroids
         readonly Color
             wonColor = new Color(255, 255, 255, 180),
             inactiveColor = new Color(255, 255, 255, 180),
-            deadColor = new Color(120, 40, 40, 120),
+            deadColor = new Color(255, 255, 255, 40),
             blinkColor = new Color(180, 180, 150, 255),
             textColor = new Color(255, 150, 0, 255),
             neutralLinkColor = new Color(180, 180, 180, 255),
@@ -218,7 +218,7 @@ namespace Andromedroids
 
                             int slotVerticalSpace = position.Y - previousPosition.Y - PLAYERHEIGHT;
 
-                            tLink = new Renderer.SpriteScreen(Layer.Default, _square, new Rectangle(previousPosition.X + PLAYERWIDTH, previousPosition.Y + (PLAYERHEIGHT - LINKWIDTH) / 2, (horizontalSpace + LINKWIDTH) / 2, LINKWIDTH), linkColors[(int)slot.state]);
+                            tLink = new Renderer.SpriteScreen(Layer.Default, _square, new Rectangle(previousPosition.X + PLAYERWIDTH, previousPosition.Y + (PLAYERHEIGHT - LINKWIDTH) / 2, (horizontalSpace + LINKWIDTH) / 2, LINKWIDTH), linkColors[(int)firstSlot.state]);
                             bLink = new Renderer.SpriteScreen(Layer.Default, _square, new Rectangle(position.X + PLAYERWIDTH, position.Y + (PLAYERHEIGHT - LINKWIDTH) / 2, (horizontalSpace + LINKWIDTH) / 2, LINKWIDTH), linkColors[(int)slot.state]);
 
                             bBridge = new Renderer.SpriteScreen(Layer.Default, _square,
@@ -227,7 +227,7 @@ namespace Andromedroids
 
                             tBridge = new Renderer.SpriteScreen(Layer.Default, _square,
                                 new Rectangle(averageMiddle.X + (horizontalSpace - LINKWIDTH) / 2, previousPosition.Y + (PLAYERHEIGHT - LINKWIDTH) / 2, LINKWIDTH, (slotVerticalSpace + PLAYERHEIGHT) / 2 + LINKWIDTH),
-                                linkColors[(int)slot.state]);
+                                linkColors[(int)firstSlot.state]);
 
                             connector = new Renderer.SpriteScreen(new Layer(MainLayer.Main, 1), _square, 
                                 new Rectangle(averageMiddle.X + (horizontalSpace - LINKWIDTH) / 2, averageMiddle.Y - LINKWIDTH / 2, (horizontalSpace + LINKWIDTH) / 2, LINKWIDTH), 
